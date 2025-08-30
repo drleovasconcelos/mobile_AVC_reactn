@@ -1,49 +1,121 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { usePacientes } from '../context/PacientesContext';
 
 const Cadastro = ({ navigation }) => {
+    const { adicionarPaciente } = usePacientes();
     const [nome, setNome] = useState('');
     const [dataAdmissao, setDataAdmissao] = useState('');
     const [diagnostico, setDiagnostico] = useState('');
     const [prontuario, setProntuario] = useState('');
+    const [errors, setErrors] = useState({});
+
+    const validateFields = () => {
+        const newErrors = {};
+        
+        if (!nome.trim()) {
+            newErrors.nome = 'Nome é obrigatório';
+        }
+        if (!dataAdmissao.trim()) {
+            newErrors.dataAdmissao = 'Data de admissão é obrigatória';
+        }
+        if (!diagnostico.trim()) {
+            newErrors.diagnostico = 'Diagnóstico é obrigatório';
+        }
+        if (!prontuario.trim()) {
+            newErrors.prontuario = 'Número de prontuário é obrigatório';
+        }
+        
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleCadastro = () => {
-        // Lógica para cadastrar o paciente
-        console.log({ nome, dataAdmissao, diagnostico, prontuario });
-        navigation.goBack();
+        if (validateFields()) {
+            const novoPaciente = {
+                nome: nome.trim(),
+                dataAdmissao: dataAdmissao.trim(),
+                diagnostico: diagnostico.trim(),
+                prontuario: prontuario.trim()
+            };
+            
+            adicionarPaciente(novoPaciente);
+            
+            Alert.alert(
+                'Sucesso', 
+                'Paciente cadastrado com sucesso!',
+                [
+                    {
+                        text: 'OK',
+                        onPress: () => navigation.navigate('ListaPacientes')
+                    }
+                ]
+            );
+        }
     };
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Cadastro</Text>
+            <Text style={styles.title}>Cadastro de Paciente</Text>
+            
             <TextInput
-                style={styles.input}
-                placeholder="Nome"
+                style={[styles.input, errors.nome && styles.inputError]}
+                placeholder="Nome completo"
                 value={nome}
-                onChangeText={setNome}
+                onChangeText={(text) => {
+                    setNome(text);
+                    if (errors.nome) setErrors({...errors, nome: null});
+                }}
             />
+            {errors.nome && <Text style={styles.errorText}>{errors.nome}</Text>}
+            
             <TextInput
-                style={styles.input}
-                placeholder="Data de Admissão"
+                style={[styles.input, errors.dataAdmissao && styles.inputError]}
+                placeholder="Data de Admissão (DD/MM/AAAA)"
                 value={dataAdmissao}
-                onChangeText={setDataAdmissao}
+                onChangeText={(text) => {
+                    setDataAdmissao(text);
+                    if (errors.dataAdmissao) setErrors({...errors, dataAdmissao: null});
+                }}
             />
+            {errors.dataAdmissao && <Text style={styles.errorText}>{errors.dataAdmissao}</Text>}
+            
             <TextInput
-                style={styles.input}
+                style={[styles.input, errors.diagnostico && styles.inputError]}
                 placeholder="Diagnóstico"
                 value={diagnostico}
-                onChangeText={setDiagnostico}
+                onChangeText={(text) => {
+                    setDiagnostico(text);
+                    if (errors.diagnostico) setErrors({...errors, diagnostico: null});
+                }}
+                multiline
             />
+            {errors.diagnostico && <Text style={styles.errorText}>{errors.diagnostico}</Text>}
+            
             <TextInput
-                style={styles.input}
+                style={[styles.input, errors.prontuario && styles.inputError]}
                 placeholder="Número de Prontuário"
                 value={prontuario}
-                onChangeText={setProntuario}
+                onChangeText={(text) => {
+                    setProntuario(text);
+                    if (errors.prontuario) setErrors({...errors, prontuario: null});
+                }}
                 keyboardType="numeric"
             />
-            <TouchableOpacity style={styles.button} onPress={handleCadastro}>
-                <Text style={styles.buttonText}>Cadastrar</Text>
-            </TouchableOpacity>
+            {errors.prontuario && <Text style={styles.errorText}>{errors.prontuario}</Text>}
+            
+            <View style={styles.buttonContainer}>
+                <TouchableOpacity style={styles.button} onPress={handleCadastro}>
+                    <Text style={styles.buttonText}>Cadastrar</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                    style={styles.buttonSecondary} 
+                    onPress={() => navigation.goBack()}
+                >
+                    <Text style={styles.buttonTextSecondary}>Cancelar</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };
@@ -54,30 +126,67 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 16,
+        backgroundColor: '#f5f5f5',
     },
     title: {
-        fontSize: 24,
-        marginBottom: 16,
+        fontSize: 28,
+        fontWeight: 'bold',
+        marginBottom: 30,
+        color: '#333',
+        textAlign: 'center',
     },
     input: {
         width: '100%',
-        maxWidth: 300,
-        height: 40,
-        borderColor: '#ccc',
+        maxWidth: 350,
+        height: 45,
+        borderColor: '#ddd',
         borderWidth: 1,
-        borderRadius: 5,
-        marginBottom: 12,
-        paddingHorizontal: 10,
+        borderRadius: 8,
+        marginBottom: 8,
+        paddingHorizontal: 15,
+        backgroundColor: '#fff',
+        fontSize: 16,
+    },
+    inputError: {
+        borderColor: '#ff6b6b',
+        borderWidth: 2,
+    },
+    errorText: {
+        color: '#ff6b6b',
+        fontSize: 12,
+        marginBottom: 8,
+        alignSelf: 'flex-start',
+        marginLeft: 25,
+    },
+    buttonContainer: {
+        width: '100%',
+        maxWidth: 350,
+        marginTop: 20,
     },
     button: {
         backgroundColor: '#28a745',
-        paddingVertical: 10,
+        paddingVertical: 15,
         paddingHorizontal: 30,
-        borderRadius: 5,
+        borderRadius: 8,
+        marginBottom: 15,
+        alignItems: 'center',
+    },
+    buttonSecondary: {
+        backgroundColor: '#6c757d',
+        paddingVertical: 15,
+        paddingHorizontal: 30,
+        borderRadius: 8,
+        alignItems: 'center',
     },
     buttonText: {
         color: '#fff',
-        fontSize: 16,
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    buttonTextSecondary: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
     },
 });
 
