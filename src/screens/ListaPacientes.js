@@ -10,9 +10,12 @@ import {
     SafeAreaView 
 } from 'react-native';
 import { usePacientes } from '../context/PacientesContext';
+import { useAuth } from '../context/AuthContext';
+import Footer from '../components/Footer';
 
 const ListaPacientes = ({ navigation }) => {
     const { pacientes, buscarPacientes } = usePacientes();
+    const { logout, currentUser } = useAuth();
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredPacientes, setFilteredPacientes] = useState(pacientes);
 
@@ -21,28 +24,17 @@ const ListaPacientes = ({ navigation }) => {
         setFilteredPacientes(buscarPacientes(searchTerm));
     }, [searchTerm, pacientes, buscarPacientes]);
 
-    const handleLogout = () => {
-        Alert.alert(
-            'Sair',
-            'Deseja realmente sair do sistema?',
-            [
-                {
-                    text: 'Cancelar',
-                    style: 'cancel'
-                },
-                {
-                    text: 'Sair',
-                    onPress: () => navigation.navigate('Login')
-                }
-            ]
-        );
-    };
+    // Removido handleLogout pois agora está no Footer
 
     const handlePacientePress = (paciente) => {
         Alert.alert(
             'Detalhes do Paciente',
             `Nome: ${paciente.nome}\nProntuário: ${paciente.prontuario}\nData de Admissão: ${paciente.dataAdmissao}\nDiagnóstico: ${paciente.diagnostico}\nStatus: ${paciente.status}`,
             [
+                { 
+                    text: 'Avaliação do Paciente', 
+                    onPress: () => navigation.navigate('AvaliacaoPaciente', { paciente }) 
+                },
                 { text: 'Editar', onPress: () => console.log('Editar paciente:', paciente.id) },
                 { text: 'Fechar', style: 'cancel' }
             ]
@@ -81,9 +73,19 @@ const ListaPacientes = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Lista de Pacientes</Text>
-                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                    <Text style={styles.logoutText}>Sair</Text>
+                <View style={styles.headerLeft}>
+                    <Text style={styles.headerTitle}>Lista de Pacientes</Text>
+                    {currentUser && (
+                        <Text style={styles.userInfo}>
+                            {currentUser.tipo === 'admin' ? '👨‍💼' : currentUser.tipo === 'medico' ? '👨‍⚕️' : '👩‍⚕️'} {currentUser.nome}
+                        </Text>
+                    )}
+                </View>
+                <TouchableOpacity 
+                    style={styles.addButton}
+                    onPress={() => navigation.navigate('Cadastro')}
+                >
+                    <Text style={styles.addButtonText}>+</Text>
                 </TouchableOpacity>
             </View>
 
@@ -130,12 +132,7 @@ const ListaPacientes = ({ navigation }) => {
                 }
             />
 
-            <TouchableOpacity 
-                style={styles.fab}
-                onPress={() => navigation.navigate('Cadastro')}
-            >
-                <Text style={styles.fabText}>+</Text>
-            </TouchableOpacity>
+            <Footer navigation={navigation} currentScreen="ListaPacientes" />
         </SafeAreaView>
     );
 };
@@ -154,20 +151,36 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
         backgroundColor: '#007bff',
     },
+    headerLeft: {
+        flex: 1,
+    },
     headerTitle: {
         color: '#fff',
         fontSize: 24,
         fontWeight: 'bold',
     },
-    logoutButton: {
-        backgroundColor: '#dc3545',
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 8,
-    },
-    logoutText: {
+    userInfo: {
         color: '#fff',
-        fontSize: 16,
+        fontSize: 14,
+        marginTop: 5,
+        opacity: 0.9,
+    },
+    addButton: {
+        backgroundColor: '#28a745',
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    addButtonText: {
+        color: '#fff',
+        fontSize: 24,
         fontWeight: 'bold',
     },
     searchContainer: {
@@ -265,26 +278,6 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: '#6c757d',
         textAlign: 'center',
-    },
-    fab: {
-        position: 'absolute',
-        bottom: 20,
-        right: 20,
-        backgroundColor: '#007bff',
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-    fabText: {
-        color: '#fff',
-        fontSize: 30,
     },
 });
 

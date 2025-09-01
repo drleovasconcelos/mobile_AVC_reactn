@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import axios from 'axios';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
+import { useAuth } from '../context/AuthContext';
 
 const Login = ({ navigation }) => {
+    const { login, usuarios } = useAuth();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errors, setErrors] = useState({});
+    const [showCredentials, setShowCredentials] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const validateFields = () => {
         const newErrors = {};
@@ -21,23 +24,29 @@ const Login = ({ navigation }) => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = () => {
         if (!validateFields()) return;
         
-        try {
-            const response = await axios.post('/api/login', { username, password });
-            // Handle successful login (e.g., redirect or store token)
-            console.log(response.data);
-            Alert.alert('Sucesso', 'Login realizado com sucesso!');
-            // Redirecionar para a lista de pacientes
-            navigation.navigate('ListaPacientes');
-        } catch (err) {
-            setErrors({ general: 'Usuário ou senha inválidos' });
+        const result = login(username, password);
+        
+        if (result.success) {
+            Alert.alert(
+                'Sucesso', 
+                `Bem-vindo, ${result.user.nome}!`,
+                [
+                    {
+                        text: 'OK',
+                        onPress: () => navigation.navigate('ListaPacientes')
+                    }
+                ]
+            );
+        } else {
+            setErrors({ general: result.message });
         }
     };
 
     return (
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.title}>Sistema AVC</Text>
             <Text style={styles.subtitle}>Faça login para continuar</Text>
             
@@ -55,16 +64,26 @@ const Login = ({ navigation }) => {
             />
             {errors.username && <Text style={styles.errorText}>{errors.username}</Text>}
             
-            <TextInput
-                style={[styles.input, errors.password && styles.inputError]}
-                placeholder="Senha"
-                value={password}
-                onChangeText={(text) => {
-                    setPassword(text);
-                    if (errors.password) setErrors({...errors, password: null});
-                }}
-                secureTextEntry
-            />
+            <View style={styles.passwordContainer}>
+                <TextInput
+                    style={[styles.passwordInput, errors.password && styles.inputError]}
+                    placeholder="Senha"
+                    value={password}
+                    onChangeText={(text) => {
+                        setPassword(text);
+                        if (errors.password) setErrors({...errors, password: null});
+                    }}
+                    secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity 
+                    style={styles.eyeButton}
+                    onPress={() => setShowPassword(!showPassword)}
+                >
+                    <Text style={styles.eyeIcon}>
+                        {showPassword ? '👁️' : '👁️‍🗨️'}
+                    </Text>
+                </TouchableOpacity>
+            </View>
             {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
             
             <TouchableOpacity style={styles.button} onPress={handleSubmit}>
@@ -73,11 +92,36 @@ const Login = ({ navigation }) => {
             
             <TouchableOpacity
                 style={styles.linkButton}
-                onPress={() => navigation.navigate('Cadastro')}
+                onPress={() => navigation.navigate('CadastroUsuario')}
             >
                 <Text style={styles.linkText}>Criar nova conta</Text>
             </TouchableOpacity>
-        </View>
+
+            {/* Seção de credenciais para demonstração */}
+            <TouchableOpacity
+                style={styles.credentialsButton}
+                onPress={() => setShowCredentials(!showCredentials)}
+            >
+                <Text style={styles.credentialsText}>
+                    {showCredentials ? 'Ocultar' : 'Mostrar'} Credenciais de Teste
+                </Text>
+            </TouchableOpacity>
+
+            {showCredentials && (
+                <View style={styles.credentialsContainer}>
+                    <Text style={styles.credentialsTitle}>Usuários de Teste:</Text>
+                    {usuarios.map((user, index) => (
+                        <View key={user.id} style={styles.credentialItem}>
+                            <Text style={styles.credentialLabel}>
+                                {user.tipo === 'admin' ? '👨‍💼' : user.tipo === 'medico' ? '👨‍⚕️' : '👩‍⚕️'} {user.nome}
+                            </Text>
+                            <Text style={styles.credentialText}>Usuário: {user.username}</Text>
+                            <Text style={styles.credentialText}>Senha: {user.password}</Text>
+                        </View>
+                    ))}
+                </View>
+            )}
+        </ScrollView>
     );
 };
 
@@ -117,6 +161,41 @@ const styles = StyleSheet.create({
     inputError: {
         borderColor: '#ff6b6b',
         borderWidth: 2,
+    },
+    passwordContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '100%',
+        maxWidth: 350,
+        marginBottom: 8,
+    },
+    passwordInput: {
+        flex: 1,
+        height: 45,
+        borderColor: '#ddd',
+        borderWidth: 1,
+        borderRadius: 8,
+        paddingHorizontal: 15,
+        backgroundColor: '#fff',
+        fontSize: 16,
+        borderTopRightRadius: 0,
+        borderBottomRightRadius: 0,
+    },
+    eyeButton: {
+        height: 45,
+        width: 45,
+        backgroundColor: '#f8f9fa',
+        borderColor: '#ddd',
+        borderWidth: 1,
+        borderLeftWidth: 0,
+        borderRadius: 8,
+        borderTopLeftRadius: 0,
+        borderBottomLeftRadius: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    eyeIcon: {
+        fontSize: 18,
     },
     errorText: {
         color: '#ff6b6b',
@@ -159,6 +238,56 @@ const styles = StyleSheet.create({
         color: '#007bff',
         fontSize: 16,
         textDecorationLine: 'underline',
+    },
+    credentialsButton: {
+        marginTop: 20,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        backgroundColor: '#f8f9fa',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#dee2e6',
+    },
+    credentialsText: {
+        color: '#6c757d',
+        fontSize: 14,
+        textAlign: 'center',
+    },
+    credentialsContainer: {
+        marginTop: 20,
+        padding: 15,
+        backgroundColor: '#f8f9fa',
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#dee2e6',
+        width: '100%',
+        maxWidth: 350,
+    },
+    credentialsTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#495057',
+        marginBottom: 10,
+        textAlign: 'center',
+    },
+    credentialItem: {
+        marginBottom: 15,
+        padding: 10,
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
+    },
+    credentialLabel: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#343a40',
+        marginBottom: 5,
+    },
+    credentialText: {
+        fontSize: 12,
+        color: '#6c757d',
+        marginBottom: 2,
     },
 });
 

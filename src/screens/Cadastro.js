@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView } from 'react-native';
 import { usePacientes } from '../context/PacientesContext';
+import Footer from '../components/Footer';
 
 const Cadastro = ({ navigation }) => {
     const { adicionarPaciente } = usePacientes();
@@ -55,8 +56,9 @@ const Cadastro = ({ navigation }) => {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Cadastro de Paciente</Text>
+        <SafeAreaView style={styles.container}>
+            <View style={styles.content}>
+                <Text style={styles.title}>Cadastro de Paciente</Text>
             
             <TextInput
                 style={[styles.input, errors.nome && styles.inputError]}
@@ -116,17 +118,24 @@ const Cadastro = ({ navigation }) => {
                     <Text style={styles.buttonTextSecondary}>Cancelar</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+            </View>
+
+            <Footer navigation={navigation} currentScreen="Cadastro" />
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
+        backgroundColor: '#f5f5f5',
+    },
+    content: {
+        flex: 1,
+        justifyContent: 'flex-start',
         alignItems: 'center',
         padding: 16,
-        backgroundColor: '#f5f5f5',
+        paddingTop: 50,
     },
     title: {
         fontSize: 28,
