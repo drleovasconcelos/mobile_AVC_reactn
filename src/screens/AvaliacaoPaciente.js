@@ -14,11 +14,7 @@ const AvaliacaoPaciente = ({ navigation, route }) => {
     const { paciente } = route.params;
 
     const handleAnamnese = () => {
-        Alert.alert(
-            'Anamnese',
-            'Funcionalidade em desenvolvimento.\n\nConteúdo: Queixa Principal, História da Doença Atual, Sinais Vitais',
-            [{ text: 'OK', style: 'default' }]
-        );
+        navigation.navigate('Anamnese', { paciente });
     };
 
     const handleExamesFisicos = () => {

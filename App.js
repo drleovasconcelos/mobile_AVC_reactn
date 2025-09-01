@@ -6,6 +6,7 @@ import Cadastro from './src/screens/Cadastro';
 import CadastroUsuario from './src/screens/CadastroUsuario';
 import ListaPacientes from './src/screens/ListaPacientes';
 import AvaliacaoPaciente from './src/screens/AvaliacaoPaciente';
+import Anamnese from './src/screens/Anamnese';
 import { PacientesProvider } from './src/context/PacientesContext';
 import { AuthProvider } from './src/context/AuthContext';
 import { StyleSheet, Text, View } from 'react-native';
@@ -58,14 +59,22 @@ export default function App() {
                 headerBackTitle: 'Voltar'
             }}
             />
-            <Stack.Screen 
-              name="AvaliacaoPaciente" 
-              component={AvaliacaoPaciente} 
-              options={{ 
-                title: 'Avaliação do Paciente',
-                headerBackTitle: 'Voltar'
-              }}
-            />
+                                    <Stack.Screen
+                          name="AvaliacaoPaciente"
+                          component={AvaliacaoPaciente}
+                          options={{
+                            title: 'Avaliação do Paciente',
+                            headerBackTitle: 'Voltar'
+                          }}
+                        />
+                        <Stack.Screen
+                          name="Anamnese"
+                          component={Anamnese}
+                          options={{
+                            title: 'Anamnese',
+                            headerBackTitle: 'Voltar'
+                          }}
+                        />
           </Stack.Navigator>
         </NavigationContainer>
       </PacientesProvider>
