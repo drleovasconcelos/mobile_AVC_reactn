@@ -34,11 +34,7 @@ const AvaliacaoPaciente = ({ navigation, route }) => {
     };
 
     const handleDashboard = () => {
-        Alert.alert(
-            'Dashboard',
-            'Funcionalidade em desenvolvimento.\n\nConteúdo: Resumo da Avaliação, Hipótese Diagnóstica, Conduta, Prescrições',
-            [{ text: 'OK', style: 'default' }]
-        );
+        navigation.navigate('Dashboard', { paciente });
     };
 
     return (

@@ -7,7 +7,9 @@ import CadastroUsuario from './src/screens/CadastroUsuario';
 import ListaPacientes from './src/screens/ListaPacientes';
 import AvaliacaoPaciente from './src/screens/AvaliacaoPaciente';
 import Anamnese from './src/screens/Anamnese';
+import Dashboard from './src/screens/Dashboard';
 import { PacientesProvider } from './src/context/PacientesContext';
+import { AnamneseProvider } from './src/context/AnamneseContext';
 import { AuthProvider } from './src/context/AuthContext';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -17,7 +19,8 @@ export default function App() {
   return (
     <AuthProvider>
       <PacientesProvider>
-        <NavigationContainer>
+        <AnamneseProvider>
+          <NavigationContainer>
           <Stack.Navigator 
             initialRouteName="Login"
             screenOptions={{
@@ -75,8 +78,17 @@ export default function App() {
                             headerBackTitle: 'Voltar'
                           }}
                         />
+                        <Stack.Screen
+                          name="Dashboard"
+                          component={Dashboard}
+                          options={{
+                            title: 'Dashboard Clínico',
+                            headerBackTitle: 'Voltar'
+                          }}
+                        />
           </Stack.Navigator>
         </NavigationContainer>
+        </AnamneseProvider>
       </PacientesProvider>
     </AuthProvider>
   );
