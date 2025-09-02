@@ -485,6 +485,22 @@ const Dashboard = ({ navigation, route }) => {
                         </Text>
                     )}
 
+                    {/* Exame Físico */}
+                    {dashboardData.exameFisico && (
+                        <Text style={styles.documentSection}>
+                            EXAME FÍSICO{'\n'}
+                            ------------{'\n'}
+                            {dashboardData.exameFisico.atividadesDiarias ? `Atividades Diárias: ${dashboardData.exameFisico.atividadesDiarias}\n` : ''}
+                            {dashboardData.exameFisico.localizacaoDor ? `Localização da Dor: ${dashboardData.exameFisico.localizacaoDor}\n` : ''}
+                            {dashboardData.exameFisico.intensidadeDor ? `Intensidade da Dor: ${dashboardData.exameFisico.intensidadeDor}\n` : ''}
+                            {dashboardData.exameFisico.pressaoArterial ? `Pressão Arterial: ${dashboardData.exameFisico.pressaoArterial}\n` : ''}
+                            {dashboardData.exameFisico.frequenciaCardiaca ? `Frequência Cardíaca: ${dashboardData.exameFisico.frequenciaCardiaca}\n` : ''}
+                            {dashboardData.exameFisico.inspecaoPostural ? `Inspeção Postural: ${dashboardData.exameFisico.inspecaoPostural}\n` : ''}
+                            {dashboardData.exameFisico.forcaMuscular ? `Força Muscular: ${dashboardData.exameFisico.forcaMuscular}\n` : ''}
+                            {dashboardData.exameFisico.padraoMarcha ? `Padrão de Marcha: ${dashboardData.exameFisico.padraoMarcha}\n` : ''}
+                        </Text>
+                    )}
+
                     {/* Rodapé do documento */}
                     <Text style={styles.documentFooter}>
                         {'\n'}=================================={'\n'}

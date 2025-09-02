@@ -8,6 +8,8 @@ import ListaPacientes from './src/screens/ListaPacientes';
 import AvaliacaoPaciente from './src/screens/AvaliacaoPaciente';
 import Anamnese from './src/screens/Anamnese';
 import Dashboard from './src/screens/Dashboard';
+import ExameFisico from './src/screens/ExameFisico';
+import ExamesComplementares from './src/screens/ExamesComplementares';
 import { PacientesProvider } from './src/context/PacientesContext';
 import { AnamneseProvider } from './src/context/AnamneseContext';
 import { AuthProvider } from './src/context/AuthContext';
@@ -86,7 +88,23 @@ export default function App() {
                             headerBackTitle: 'Voltar'
                           }}
                         />
-          </Stack.Navigator>
+                        <Stack.Screen
+                            name="ExameFisico"
+                            component={ExameFisico}
+                            options={{
+                                title: 'Exame Físico',
+                                headerBackTitle: 'Voltar'
+                            }}
+                        />
+                        <Stack.Screen
+                            name="ExamesComplementares"
+                            component={ExamesComplementares}
+                            options={{
+                                title: 'Exames Complementares',
+                                headerBackTitle: 'Voltar'
+                            }}
+                        />
+                    </Stack.Navigator>
         </NavigationContainer>
         </AnamneseProvider>
       </PacientesProvider>

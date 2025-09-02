@@ -1131,7 +1131,15 @@ const Anamnese = ({ navigation, route }) => {
                 </ScrollView>
             </KeyboardAvoidingView>
 
-
+            {/* Botão para Exame Físico */}
+            <View style={styles.exameFisicoButtonContainer}>
+                <TouchableOpacity 
+                    style={styles.exameFisicoButton}
+                    onPress={() => navigation.navigate('ExameFisico', { paciente })}
+                >
+                    <Text style={styles.exameFisicoButtonText}>🔍 EXAME FÍSICO</Text>
+                </TouchableOpacity>
+            </View>
             
             <Footer navigation={navigation} currentScreen="Anamnese" />
         </SafeAreaView>
@@ -1304,6 +1312,30 @@ const styles = StyleSheet.create({
         color: '#007bff',
         fontWeight: '600',
         marginLeft: 8,
+    },
+    exameFisicoButtonContainer: {
+        paddingHorizontal: 20,
+        paddingVertical: 15,
+        backgroundColor: '#fff',
+        borderTopWidth: 1,
+        borderTopColor: '#e9ecef',
+    },
+    exameFisicoButton: {
+        backgroundColor: '#28a745',
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    exameFisicoButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
 

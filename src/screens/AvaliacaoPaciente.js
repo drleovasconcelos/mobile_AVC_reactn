@@ -18,19 +18,11 @@ const AvaliacaoPaciente = ({ navigation, route }) => {
     };
 
     const handleExamesFisicos = () => {
-        Alert.alert(
-            'Exames Físicos',
-            'Funcionalidade em desenvolvimento.\n\nConteúdo: Exame Físico Geral, Avaliação Neurológica, Avaliação Cardiovascular',
-            [{ text: 'OK', style: 'default' }]
-        );
+        navigation.navigate('ExameFisico', { paciente });
     };
 
     const handleExamesComplementares = () => {
-        Alert.alert(
-            'Exames Complementares',
-            'Funcionalidade em desenvolvimento.\n\nConteúdo: Exames Solicitados, Resultados, Imagens',
-            [{ text: 'OK', style: 'default' }]
-        );
+        navigation.navigate('ExamesComplementares', { paciente });
     };
 
     const handleDashboard = () => {
