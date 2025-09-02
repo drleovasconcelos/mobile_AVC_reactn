@@ -80,30 +80,30 @@ export default function App() {
                             headerBackTitle: 'Voltar'
                           }}
                         />
-                        <Stack.Screen
-                          name="Dashboard"
-                          component={Dashboard}
-                          options={{
-                            title: 'Dashboard Clínico',
-                            headerBackTitle: 'Voltar'
-                          }}
-                        />
-                        <Stack.Screen
-                            name="ExameFisico"
-                            component={ExameFisico}
-                            options={{
-                                title: 'Exame Físico',
-                                headerBackTitle: 'Voltar'
-                            }}
-                        />
-                        <Stack.Screen
-                            name="ExamesComplementares"
-                            component={ExamesComplementares}
-                            options={{
-                                title: 'Exames Complementares',
-                                headerBackTitle: 'Voltar'
-                            }}
-                        />
+                         <Stack.Screen
+                           name="Dashboard"
+                           component={Dashboard}
+                           options={{
+                             title: 'Dashboard Clínico',
+                             headerBackTitle: 'Voltar'
+                           }}
+                         />
+                         <Stack.Screen
+                             name="ExameFisico"
+                             component={ExameFisico}
+                             options={{
+                                 title: 'Exame Físico',
+                                 headerBackTitle: 'Voltar'
+                             }}
+                         />
+                         <Stack.Screen
+                             name="ExamesComplementares"
+                             component={ExamesComplementares}
+                             options={{
+                                 title: 'Exames Complementares',
+                                 headerBackTitle: 'Voltar'
+                             }}
+                         />
                     </Stack.Navigator>
         </NavigationContainer>
         </AnamneseProvider>
@@ -119,4 +119,3 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-
