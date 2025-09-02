@@ -34,13 +34,29 @@ const Dashboard = ({ navigation, route }) => {
         sexo: '',
         racaCor: '',
         
-        // Dados da anamnese
-        queixaPrincipal: '',
+        // Informações socioeconômicas
+        ocupacao: '',
+        estadoCivil: '',
+        escolaridade: '',
+        lateralidade: '',
+        tipoTransporte: '',
+        outroTransporte: '',
+        
+        // Impressão geral
+        impressaoGeral: [],
+        locomocao: '',
+        outrosImpressao: '',
+        outrosLocomocao: '',
+        
+        // Queixa principal
+        descricaoQueixa: '',
         inicioSintomas: '',
         intensidade: '',
         frequencia: '',
         fatoresMelhora: '',
         fatoresPiora: '',
+        
+        // História da doença
         evolucaoSintomas: '',
         tratamentosAnteriores: '',
         examesRealizados: '',
@@ -190,13 +206,35 @@ const Dashboard = ({ navigation, route }) => {
 
     // Função para gerar texto do dashboard para compartilhamento
     const generateDashboardText = useCallback(() => {
-        let text = `DASHBOARD CLÍNICO\n`;
-        text += `Paciente: ${paciente.nome}\n`;
+        let text = `AVALIAÇÃO CLÍNICA DO PACIENTE\n`;
+        text += `===================================\n\n`;
+        text += `Nome: ${paciente.nome}\n`;
         text += `Prontuário: ${paciente.prontuario}\n`;
-        text += `Data: ${dashboardData.dataAvaliacao}\n\n`;
+        text += `Data da Avaliação: ${dashboardData.dataAvaliacao}\n\n`;
         
-        if (dashboardData.queixaPrincipal) {
-            text += `QUEIXA PRINCIPAL: ${dashboardData.queixaPrincipal}\n\n`;
+        if (dashboardData.dataNascimento) {
+            text += `Data de Nascimento: ${dashboardData.dataNascimento}\n`;
+        }
+        if (dashboardData.idade) {
+            text += `Idade: ${dashboardData.idade} anos\n`;
+        }
+        if (dashboardData.sexo) {
+            text += `Sexo: ${dashboardData.sexo}\n`;
+        }
+        if (dashboardData.racaCor) {
+            text += `Raça/Cor: ${dashboardData.racaCor}\n`;
+        }
+        if (dashboardData.diagnosticoClinico) {
+            text += `Diagnóstico Clínico: ${dashboardData.diagnosticoClinico}\n`;
+        }
+        text += `\n`;
+        
+        if (dashboardData.descricaoQueixa) {
+            text += `QUEIXA PRINCIPAL: ${dashboardData.descricaoQueixa}\n\n`;
+        }
+        
+        if (dashboardData.evolucaoSintomas) {
+            text += `HISTÓRIA DA DOENÇA: ${dashboardData.evolucaoSintomas}\n\n`;
         }
         
         if (dashboardData.hipotesesDiagnosticas) {
@@ -304,215 +342,156 @@ const Dashboard = ({ navigation, route }) => {
                     )}
                 </View>
 
-                {/* Seção de Identificação */}
-                <View style={styles.mainSection}>
-                    <Text style={styles.mainSectionTitle}>👤 IDENTIFICAÇÃO</Text>
-                    <View style={styles.identificationGrid}>
-                        <View style={styles.identificationItem}>
-                            <Text style={styles.identificationLabel}>Nome:</Text>
-                            <Text style={styles.identificationValue}>{paciente.nome}</Text>
-                        </View>
-                        <View style={styles.identificationItem}>
-                            <Text style={styles.identificationLabel}>Prontuário:</Text>
-                            <Text style={styles.identificationValue}>{paciente.prontuario}</Text>
-                        </View>
-                        {dashboardData.idade && (
-                            <View style={styles.identificationItem}>
-                                <Text style={styles.identificationLabel}>Idade:</Text>
-                                <Text style={styles.identificationValue}>{dashboardData.idade} anos</Text>
-                            </View>
-                        )}
-                        {dashboardData.sexo && (
-                            <View style={styles.identificationItem}>
-                                <Text style={styles.identificationLabel}>Sexo:</Text>
-                                <Text style={styles.identificationValue}>{dashboardData.sexo}</Text>
-                            </View>
-                        )}
-                    </View>
-                </View>
+                {/* Conteúdo unificado como arquivo de texto */}
+                <View style={styles.unifiedContent}>
+                    {/* Cabeçalho do documento */}
+                    <Text style={styles.documentHeader}>
+                        AVALIAÇÃO CLÍNICA DO PACIENTE{'\n'}
+                        ===================================
+                    </Text>
 
-                {/* Indicador de dados vazios */}
-                {!Object.keys(dashboardData).some(key => 
-                    key !== 'dataAvaliacao' && 
-                    key !== 'numeroProntuario' && 
-                    key !== 'nomeCompleto' && 
-                    dashboardData[key] && dashboardData[key] !== ''
-                ) && (
-                    <View style={styles.emptyState}>
-                        <Text style={styles.emptyStateIcon}>📋</Text>
-                        <Text style={styles.emptyStateTitle}>Nenhum dado disponível</Text>
-                        <Text style={styles.emptyStateText}>
-                            Para visualizar o resumo clínico, preencha os dados na tela de Anamnese.
+                    {/* Identificação */}
+                    <Text style={styles.documentSection}>
+                        IDENTIFICAÇÃO{'\n'}
+                        ------------{'\n'}
+                        Nome: {paciente.nome}{'\n'}
+                        Prontuário: {paciente.prontuario}{'\n'}
+                        Data da Avaliação: {dashboardData.dataAvaliacao}{'\n'}
+                        {dashboardData.dataNascimento ? `Data de Nascimento: ${dashboardData.dataNascimento}\n` : ''}
+                        {dashboardData.idade ? `Idade: ${dashboardData.idade} anos\n` : ''}
+                        {dashboardData.sexo ? `Sexo: ${dashboardData.sexo}\n` : ''}
+                        {dashboardData.racaCor ? `Raça/Cor: ${dashboardData.racaCor}\n` : ''}
+                        {dashboardData.diagnosticoClinico ? `Diagnóstico Clínico: ${dashboardData.diagnosticoClinico}\n` : ''}
+                    </Text>
+
+                    {/* Informações Socioeconômicas */}
+                    {(dashboardData.ocupacao || dashboardData.estadoCivil || dashboardData.escolaridade || dashboardData.lateralidade) && (
+                        <Text style={styles.documentSection}>
+                            INFORMAÇÕES SOCIOECONÔMICAS{'\n'}
+                            ----------------------------{'\n'}
+                            {dashboardData.ocupacao ? `Ocupação/Profissão: ${dashboardData.ocupacao}\n` : ''}
+                            {dashboardData.estadoCivil ? `Estado Civil: ${dashboardData.estadoCivil}\n` : ''}
+                            {dashboardData.escolaridade ? `Escolaridade: ${dashboardData.escolaridade}\n` : ''}
+                            {dashboardData.lateralidade ? `Lateralidade: ${dashboardData.lateralidade}\n` : ''}
+                            {dashboardData.tipoTransporte ? `Tipo de Transporte: ${dashboardData.tipoTransporte}\n` : ''}
+                            {dashboardData.outroTransporte ? `Especificação: ${dashboardData.outroTransporte}\n` : ''}
                         </Text>
-                        <TouchableOpacity 
-                            style={styles.emptyStateButton}
-                            onPress={() => navigation.navigate('Anamnese', { paciente })}
-                        >
-                            <Text style={styles.emptyStateButtonText}>Ir para Anamnese</Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
+                    )}
 
-                {/* Seção de Queixa Principal */}
-                {renderDataSection('💬 QUEIXA PRINCIPAL', dashboardData.queixaPrincipal, '💬')}
+                    {/* Impressão Geral */}
+                    {(dashboardData.impressaoGeral && dashboardData.impressaoGeral.length > 0 || dashboardData.locomocao) && (
+                        <Text style={styles.documentSection}>
+                            IMPRESSÃO GERAL{'\n'}
+                            --------------{'\n'}
+                            {dashboardData.impressaoGeral && dashboardData.impressaoGeral.length > 0 ? 
+                                `Impressão: ${dashboardData.impressaoGeral.join(', ')}\n` : ''}
+                            {dashboardData.outrosImpressao ? `Outros: ${dashboardData.outrosImpressao}\n` : ''}
+                            {dashboardData.locomocao ? `Locomoção: ${dashboardData.locomocao}\n` : ''}
+                            {dashboardData.outrosLocomocao ? `Outros: ${dashboardData.outrosLocomocao}\n` : ''}
+                        </Text>
+                    )}
 
-                {/* Seção de História da Doença */}
-                {renderDataSection('📋 HISTÓRIA DA DOENÇA ATUAL', dashboardData.evolucaoSintomas, '📋')}
+                    {/* Queixa Principal */}
+                    {dashboardData.descricaoQueixa && (
+                        <Text style={styles.documentSection}>
+                            QUEIXA PRINCIPAL{'\n'}
+                            ---------------{'\n'}
+                            {dashboardData.descricaoQueixa}{'\n'}
+                            {dashboardData.inicioSintomas ? `Início dos Sintomas: ${dashboardData.inicioSintomas}\n` : ''}
+                            {dashboardData.intensidade ? `Intensidade: ${dashboardData.intensidade}\n` : ''}
+                            {dashboardData.frequencia ? `Frequência: ${dashboardData.frequencia}\n` : ''}
+                            {dashboardData.fatoresMelhora ? `Fatores de Melhora: ${dashboardData.fatoresMelhora}\n` : ''}
+                            {dashboardData.fatoresPiora ? `Fatores de Piora: ${dashboardData.fatoresPiora}\n` : ''}
+                        </Text>
+                    )}
 
-                {/* Seção de Sintomas */}
-                {(dashboardData.inicioSintomas || dashboardData.intensidade || dashboardData.frequencia) && (
-                    <View style={styles.dataSection}>
-                        <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionIcon}>🔍</Text>
-                            <Text style={styles.sectionTitle}>CARACTERÍSTICAS DOS SINTOMAS</Text>
-                        </View>
-                        <View style={styles.dataContent}>
-                            {dashboardData.inicioSintomas && (
-                                <Text style={styles.dataText}>• Início: {dashboardData.inicioSintomas}</Text>
-                            )}
-                            {dashboardData.intensidade && (
-                                <Text style={styles.dataText}>• Intensidade: {dashboardData.intensidade}</Text>
-                            )}
-                            {dashboardData.frequencia && (
-                                <Text style={styles.dataText}>• Frequência: {dashboardData.frequencia}</Text>
-                            )}
-                            {dashboardData.fatoresMelhora && (
-                                <Text style={styles.dataText}>• Fatores de melhora: {dashboardData.fatoresMelhora}</Text>
-                            )}
-                            {dashboardData.fatoresPiora && (
-                                <Text style={styles.dataText}>• Fatores de piora: {dashboardData.fatoresPiora}</Text>
-                            )}
-                        </View>
-                    </View>
-                )}
+                    {/* História da Doença */}
+                    {dashboardData.evolucaoSintomas && (
+                        <Text style={styles.documentSection}>
+                            HISTÓRIA DA DOENÇA ATUAL{'\n'}
+                            -------------------------{'\n'}
+                            {dashboardData.evolucaoSintomas}{'\n'}
+                            {dashboardData.tratamentosAnteriores ? `Tratamentos Anteriores: ${dashboardData.tratamentosAnteriores}\n` : ''}
+                            {dashboardData.examesRealizados ? `Exames Realizados: ${dashboardData.examesRealizados}\n` : ''}
+                            {dashboardData.impactoRotina ? `Impacto na Rotina: ${dashboardData.impactoRotina}\n` : ''}
+                        </Text>
+                    )}
 
-                {/* Seção de Histórico Médico */}
-                {(dashboardData.doencasCronicas || dashboardData.cirurgiasAnteriores || dashboardData.internacoesAnteriores) && (
-                    <View style={styles.dataSection}>
-                        <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionIcon}>🏥</Text>
-                            <Text style={styles.sectionTitle}>HISTÓRICO MÉDICO</Text>
-                        </View>
-                        <View style={styles.dataContent}>
-                            {dashboardData.doencasCronicas && (
-                                <Text style={styles.dataText}>• Doenças crônicas: {dashboardData.doencasCronicas}</Text>
-                            )}
-                            {dashboardData.cirurgiasAnteriores && (
-                                <Text style={styles.dataText}>• Cirurgias: {dashboardData.cirurgiasAnteriores}</Text>
-                            )}
-                            {dashboardData.quaisCirurgias && (
-                                <Text style={styles.dataText}>  {dashboardData.quaisCirurgias}</Text>
-                            )}
-                            {dashboardData.internacoesAnteriores && (
-                                <Text style={styles.dataText}>• Internações: {dashboardData.internacoesAnteriores}</Text>
-                            )}
-                            {dashboardData.quaisInternacoes && (
-                                <Text style={styles.dataText}>  {dashboardData.quaisInternacoes}</Text>
-                            )}
-                        </View>
-                    </View>
-                )}
+                    {/* Histórico Médico */}
+                    {(dashboardData.doencasCronicas || dashboardData.cirurgiasAnteriores || dashboardData.internacoesAnteriores || dashboardData.alergiasAlimentares) && (
+                        <Text style={styles.documentSection}>
+                            HISTÓRICO MÉDICO{'\n'}
+                            ---------------{'\n'}
+                            {dashboardData.doencasCronicas ? `Doenças Crônicas: ${dashboardData.doencasCronicas}\n` : ''}
+                            {dashboardData.cirurgiasAnteriores ? `Cirurgias Anteriores: ${dashboardData.cirurgiasAnteriores}\n` : ''}
+                            {dashboardData.quaisCirurgias ? `  ${dashboardData.quaisCirurgias}\n` : ''}
+                            {dashboardData.internacoesAnteriores ? `Internações Anteriores: ${dashboardData.internacoesAnteriores}\n` : ''}
+                            {dashboardData.quaisInternacoes ? `  ${dashboardData.quaisInternacoes}\n` : ''}
+                            {dashboardData.alergiasAlimentares ? `Alergias Alimentares: ${dashboardData.alergiasAlimentares}\n` : ''}
+                            {dashboardData.quaisAlergias ? `  ${dashboardData.quaisAlergias}\n` : ''}
+                            {dashboardData.detalhesMedicos ? `Detalhamento Médico: ${dashboardData.detalhesMedicos}\n` : ''}
+                        </Text>
+                    )}
 
-                {/* Seção de Alergias */}
-                {(dashboardData.alergiasAlimentares || dashboardData.alergiasMedicamentos) && (
-                    <View style={styles.dataSection}>
-                        <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionIcon}>⚠️</Text>
-                            <Text style={styles.sectionTitle}>ALERGIAS</Text>
-                        </View>
-                        <View style={styles.dataContent}>
-                            {dashboardData.alergiasAlimentares && (
-                                <Text style={styles.dataText}>• Alimentares: {dashboardData.alergiasAlimentares}</Text>
-                            )}
-                            {dashboardData.quaisAlergias && (
-                                <Text style={styles.dataText}>  {dashboardData.quaisAlergias}</Text>
-                            )}
-                            {dashboardData.alergiasMedicamentos && (
-                                <Text style={styles.dataText}>• Medicamentos: {dashboardData.alergiasMedicamentos}</Text>
-                            )}
-                            {dashboardData.quaisAlergiasMedicamentos && (
-                                <Text style={styles.dataText}>  {dashboardData.quaisAlergiasMedicamentos}</Text>
-                            )}
-                        </View>
-                    </View>
-                )}
+                    {/* Histórico Familiar */}
+                    {(dashboardData.doencasHereditarias || dashboardData.condicoesCronicas) && (
+                        <Text style={styles.documentSection}>
+                            HISTÓRICO FAMILIAR{'\n'}
+                            ------------------{'\n'}
+                            {dashboardData.doencasHereditarias ? `Doenças Hereditárias: ${dashboardData.doencasHereditarias}\n` : ''}
+                            {dashboardData.quaisDoencasHereditarias ? `  ${dashboardData.quaisDoencasHereditarias}\n` : ''}
+                            {dashboardData.condicoesCronicas ? `Condições Crônicas: ${dashboardData.condicoesCronicas}\n` : ''}
+                            {dashboardData.quaisCondicoes ? `  ${dashboardData.quaisCondicoes}\n` : ''}
+                            {dashboardData.detalhesFamiliares ? `Detalhamento Familiar: ${dashboardData.detalhesFamiliares}\n` : ''}
+                        </Text>
+                    )}
 
-                {/* Seção de Medicamentos */}
-                {renderDataSection('💊 MEDICAMENTOS EM USO', dashboardData.quaisMedicamentos, '💊')}
+                    {/* Histórico Psicossocial */}
+                    {(dashboardData.tabagismo || dashboardData.consumoAlcool || dashboardData.usoDrogas || dashboardData.atividadeFisica || dashboardData.habitosAlimentares || dashboardData.saudeMental) && (
+                        <Text style={styles.documentSection}>
+                            HISTÓRICO PSICOSSOCIAL{'\n'}
+                            ---------------------{'\n'}
+                            {dashboardData.tabagismo ? `Tabagismo: ${dashboardData.tabagismo}\n` : ''}
+                            {dashboardData.consumoAlcool ? `Consumo de Álcool: ${dashboardData.consumoAlcool}\n` : ''}
+                            {dashboardData.usoDrogas ? `Uso de Drogas: ${dashboardData.usoDrogas}\n` : ''}
+                            {dashboardData.atividadeFisica ? `Atividade Física: ${dashboardData.atividadeFisica}\n` : ''}
+                            {dashboardData.habitosAlimentares ? `Hábitos Alimentares: ${dashboardData.habitosAlimentares}\n` : ''}
+                            {dashboardData.saudeMental ? `Saúde Mental: ${dashboardData.saudeMental}\n` : ''}
+                        </Text>
+                    )}
 
-                {/* Seção de Histórico Familiar */}
-                {(dashboardData.doencasHereditarias || dashboardData.condicoesCronicas) && (
-                    <View style={styles.dataSection}>
-                        <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionIcon}>👨‍👩‍👧‍👦</Text>
-                            <Text style={styles.sectionTitle}>HISTÓRICO FAMILIAR</Text>
-                        </View>
-                        <View style={styles.dataContent}>
-                            {dashboardData.doencasHereditarias && (
-                                <Text style={styles.dataText}>• Doenças hereditárias: {dashboardData.doencasHereditarias}</Text>
-                            )}
-                            {dashboardData.quaisDoencasHereditarias && (
-                                <Text style={styles.dataText}>  {dashboardData.quaisDoencasHereditarias}</Text>
-                            )}
-                            {dashboardData.condicoesCronicas && (
-                                <Text style={styles.dataText}>• Condições crônicas: {dashboardData.condicoesCronicas}</Text>
-                            )}
-                            {dashboardData.quaisCondicoes && (
-                                <Text style={styles.dataText}>  {dashboardData.quaisCondicoes}</Text>
-                            )}
-                        </View>
-                    </View>
-                )}
+                    {/* Uso de Medicamentos */}
+                    {(dashboardData.medicamentosUso || dashboardData.alergiasMedicamentos) && (
+                        <Text style={styles.documentSection}>
+                            USO DE MEDICAMENTOS{'\n'}
+                            -------------------{'\n'}
+                            {dashboardData.medicamentosUso ? `Medicamentos em Uso: ${dashboardData.medicamentosUso}\n` : ''}
+                            {dashboardData.quaisMedicamentos ? `  ${dashboardData.quaisMedicamentos}\n` : ''}
+                            {dashboardData.alergiasMedicamentos ? `Alergias a Medicamentos: ${dashboardData.alergiasMedicamentos}\n` : ''}
+                            {dashboardData.quaisAlergiasMedicamentos ? `  ${dashboardData.quaisAlergiasMedicamentos}\n` : ''}
+                            {dashboardData.observacoesMedicamentos ? `Observações: ${dashboardData.observacoesMedicamentos}\n` : ''}
+                        </Text>
+                    )}
 
-                {/* Seção de Hábitos de Vida */}
-                {(dashboardData.tabagismo || dashboardData.consumoAlcool || dashboardData.atividadeFisica) && (
-                    <View style={styles.dataSection}>
-                        <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionIcon}>🧠</Text>
-                            <Text style={styles.sectionTitle}>HÁBITOS DE VIDA</Text>
-                        </View>
-                        <View style={styles.dataContent}>
-                            {dashboardData.tabagismo && (
-                                <Text style={styles.dataText}>• Tabagismo: {dashboardData.tabagismo}</Text>
-                            )}
-                            {dashboardData.consumoAlcool && (
-                                <Text style={styles.dataText}>• Consumo de álcool: {dashboardData.consumoAlcool}</Text>
-                            )}
-                            {dashboardData.atividadeFisica && (
-                                <Text style={styles.dataText}>• Atividade física: {dashboardData.atividadeFisica}</Text>
-                            )}
-                            {dashboardData.habitosAlimentares && (
-                                <Text style={styles.dataText}>• Hábitos alimentares: {dashboardData.habitosAlimentares}</Text>
-                            )}
-                        </View>
-                    </View>
-                )}
+                    {/* Impressão Diagnóstica */}
+                    {(dashboardData.hipotesesDiagnosticas || dashboardData.condutaInicial || dashboardData.encaminhamentos || dashboardData.observacoesClinicas) && (
+                        <Text style={styles.documentSection}>
+                            IMPRESSÃO DIAGNÓSTICA{'\n'}
+                            ---------------------{'\n'}
+                            {dashboardData.hipotesesDiagnosticas ? `Hipóteses Diagnósticas: ${dashboardData.hipotesesDiagnosticas}\n` : ''}
+                            {dashboardData.condutaInicial ? `Conduta Inicial: ${dashboardData.condutaInicial}\n` : ''}
+                            {dashboardData.encaminhamentos ? `Encaminhamentos: ${dashboardData.encaminhamentos}\n` : ''}
+                            {dashboardData.observacoesClinicas ? `Observações Clínicas: ${dashboardData.observacoesClinicas}\n` : ''}
+                        </Text>
+                    )}
 
-                {/* Seção de Hipóteses Diagnósticas */}
-                {renderDataSection('🔍 HIPÓTESES DIAGNÓSTICAS', dashboardData.hipotesesDiagnosticas, '🔍')}
-
-                {/* Seção de Conduta */}
-                {renderDataSection('📋 CONDUTA INICIAL', dashboardData.condutaInicial, '📋')}
-
-                {/* Seção de Encaminhamentos */}
-                {renderDataSection('➡️ ENCAMINHAMENTOS', dashboardData.encaminhamentos, '➡️')}
-
-                {/* Seção de Observações Clínicas */}
-                {renderDataSection('📝 OBSERVAÇÕES CLÍNICAS', dashboardData.observacoesClinicas, '📝')}
-
-                {/* Seção de Tratamentos Anteriores */}
-                {renderDataSection('💉 TRATAMENTOS ANTERIORES', dashboardData.tratamentosAnteriores, '💉')}
-
-                {/* Seção de Exames Realizados */}
-                {renderDataSection('🔬 EXAMES REALIZADOS', dashboardData.examesRealizados, '🔬')}
-
-                {/* Seção de Impacto na Rotina */}
-                {renderDataSection('📅 IMPACTO NA ROTINA', dashboardData.impactoRotina, '📅')}
-
-                {/* Footer do documento */}
-                <View style={styles.documentFooter}>
-                    <Text style={styles.footerText}>Documento gerado em {new Date().toLocaleString('pt-BR')}</Text>
-                    <Text style={styles.footerText}>Sistema de Avaliação de Pacientes</Text>
+                    {/* Rodapé do documento */}
+                    <Text style={styles.documentFooter}>
+                        {'\n'}=================================={'\n'}
+                        Documento gerado em {new Date().toLocaleString('pt-BR')}{'\n'}
+                        Sistema de Avaliação de Pacientes{'\n'}
+                        ==================================
+                    </Text>
                 </View>
             </ScrollView>
 
@@ -771,6 +750,44 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 14,
         fontWeight: '600',
+    },
+    unifiedContent: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 20,
+        marginBottom: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    documentHeader: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#007bff',
+        textAlign: 'center',
+        marginBottom: 20,
+        lineHeight: 24,
+    },
+    documentSection: {
+        fontSize: 14,
+        color: '#495057',
+        lineHeight: 20,
+        marginBottom: 20,
+        paddingBottom: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#e9ecef',
+    },
+    documentFooter: {
+        fontSize: 12,
+        color: '#6c757d',
+        textAlign: 'center',
+        marginTop: 20,
+        paddingTop: 15,
+        borderTopWidth: 1,
+        borderTopColor: '#e9ecef',
+        lineHeight: 18,
     },
 });
 

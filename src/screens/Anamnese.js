@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import Footer from '../components/Footer';
 import { useAnamnese } from '../context/AnamneseContext';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DatePicker from '../components/DatePicker';
 
 const Anamnese = ({ navigation, route }) => {
     const { paciente } = route.params;
@@ -23,30 +23,9 @@ const Anamnese = ({ navigation, route }) => {
     // Estado para controlar quais seções estão expandidas
     const [expandedSections, setExpandedSections] = useState({});
     
-    // Estados para controlar os pickers de data
-    const [showDataAvaliacaoPicker, setShowDataAvaliacaoPicker] = useState(false);
-    const [showDataNascimentoPicker, setShowDataNascimentoPicker] = useState(false);
+
     
-    // Função auxiliar para converter string de data para Date object
-    const parseDateString = useCallback((dateString) => {
-        if (!dateString) return new Date();
-        try {
-            const parts = dateString.split('/');
-            if (parts.length === 3) {
-                const day = parseInt(parts[0]);
-                const month = parseInt(parts[1]) - 1; // Mês começa em 0
-                const year = parseInt(parts[2]);
-                
-                // Validar se os valores são válidos
-                if (day >= 1 && day <= 31 && month >= 0 && month <= 11 && year >= 1900) {
-                    return new Date(year, month, day);
-                }
-            }
-        } catch (error) {
-            console.log('Erro ao converter data:', error);
-        }
-        return new Date();
-    }, []);
+
 
     // Função para alternar o estado de expansão de uma seção
     const toggleSection = useCallback((sectionKey) => {
@@ -56,45 +35,15 @@ const Anamnese = ({ navigation, route }) => {
         }));
     }, []);
 
-    // Função para lidar com a seleção da data de avaliação
-    const handleDataAvaliacaoChange = useCallback((event, selectedDate) => {
-        setShowDataAvaliacaoPicker(false);
-        if (selectedDate && event.type !== 'dismissed') {
-            const formattedDate = selectedDate.toLocaleDateString('pt-BR');
-            setFormData(prev => ({
-                ...prev,
-                dataAvaliacao: formattedDate
-            }));
-        }
+    // Função para lidar com a mudança da data de avaliação
+    const handleDataAvaliacaoChange = useCallback((formattedDate) => {
+        setFormData(prev => ({
+            ...prev,
+            dataAvaliacao: formattedDate
+        }));
     }, []);
 
-    // Função para lidar com a seleção da data de nascimento
-    const handleDataNascimentoChange = useCallback((event, selectedDate) => {
-        setShowDataNascimentoPicker(false);
-        if (selectedDate && event.type !== 'dismissed') {
-            const formattedDate = selectedDate.toLocaleDateString('pt-BR');
-            
-            // Calcular idade de forma mais precisa
-            const today = new Date();
-            const birthDate = new Date(selectedDate);
-            
-            let age = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
-            
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
-            }
-            
-            // Garantir que a idade não seja negativa e não seja muito alta
-            age = Math.max(0, Math.min(age, 150));
-            
-            setFormData(prev => ({
-                ...prev,
-                dataNascimento: formattedDate,
-                idade: age.toString()
-            }));
-        }
-    }, []);
+
 
     // Estado para os dados do formulário
     const [formData, setFormData] = useState({
@@ -283,17 +232,13 @@ const Anamnese = ({ navigation, route }) => {
             case 'identificacao':
                 return (
                     <View style={styles.formContent}>
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Data da avaliação:</Text>
-                            <TouchableOpacity 
-                                style={styles.dateButton}
-                                onPress={() => setShowDataAvaliacaoPicker(true)}
-                            >
-                                <Text style={styles.dateButtonText}>
-                                    {formData.dataAvaliacao ? formData.dataAvaliacao : '📅 Selecionar Data'}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
+                        <DatePicker
+                            label="Data da avaliação:"
+                            value={formData.dataAvaliacao}
+                            onDateChange={handleDataAvaliacaoChange}
+                            maximumDate={new Date()}
+                            minimumDate={new Date(1900, 0, 1)}
+                        />
                         
                         <View style={styles.formRow}>
                             <Text style={styles.formLabel}>Número do prontuário:</Text>
@@ -317,23 +262,22 @@ const Anamnese = ({ navigation, route }) => {
                         
                         <View style={styles.formRow}>
                             <Text style={styles.formLabel}>Data de nascimento:</Text>
-                            <TouchableOpacity 
-                                style={styles.dateButton}
-                                onPress={() => setShowDataNascimentoPicker(true)}
-                            >
-                                <Text style={styles.dateButtonText}>
-                                    {formData.dataNascimento ? formData.dataNascimento : '📅 Selecionar Data'}
-                                </Text>
-                            </TouchableOpacity>
+                            <TextInput
+                                style={styles.textInput}
+                                value={formData.dataNascimento}
+                                onChangeText={(text) => setFormData({...formData, dataNascimento: text})}
+                                placeholder="DD/MM/AAAA"
+                            />
                         </View>
                         
                         <View style={styles.formRow}>
                             <Text style={styles.formLabel}>Idade:</Text>
                             <TextInput
-                                style={[styles.textInput, styles.ageInput]}
-                                value={formData.idade ? `${formData.idade} anos` : ''}
-                                placeholder="Idade calculada automaticamente"
-                                editable={false}
+                                style={styles.textInput}
+                                value={formData.idade}
+                                onChangeText={(text) => setFormData({...formData, idade: text})}
+                                placeholder="Digite a idade"
+                                keyboardType="numeric"
                             />
                         </View>
                         
@@ -1187,28 +1131,7 @@ const Anamnese = ({ navigation, route }) => {
                 </ScrollView>
             </KeyboardAvoidingView>
 
-            {/* DateTimePickers */}
-            {showDataAvaliacaoPicker && (
-                <DateTimePicker
-                    value={parseDateString(formData.dataAvaliacao)}
-                    mode="date"
-                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    onChange={handleDataAvaliacaoChange}
-                    maximumDate={new Date()}
-                    minimumDate={new Date(1900, 0, 1)}
-                />
-            )}
-            
-            {showDataNascimentoPicker && (
-                <DateTimePicker
-                    value={parseDateString(formData.dataNascimento)}
-                    mode="date"
-                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    onChange={handleDataNascimentoChange}
-                    maximumDate={new Date()} // Permite apenas datas até hoje
-                    minimumDate={new Date(1900, 0, 1)} // Permite datas a partir de 1900
-                />
-)}
+
             
             <Footer navigation={navigation} currentScreen="Anamnese" />
         </SafeAreaView>
@@ -1361,22 +1284,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         color: '#495057',
     },
-    dateButton: {
-        backgroundColor: '#007bff',
-        padding: 12,
-        borderRadius: 8,
-        alignItems: 'center',
-    },
-    dateButtonText: {
-        color: '#fff',
-        fontSize: 14,
-        fontWeight: '600',
-    },
-    ageInput: {
-        backgroundColor: '#f8f9fa',
-        color: '#6c757d',
-        fontStyle: 'italic',
-    },
+
+
     checkboxGroup: {
         gap: 8,
     },
