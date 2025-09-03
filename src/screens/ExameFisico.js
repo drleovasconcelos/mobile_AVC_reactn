@@ -232,7 +232,8 @@ const ExameFisico = ({ navigation, route }) => {
         outraDuracaoSessoes: '',
         encaminhamentos: [],
         outrosEncaminhamentos: '',
-        observacoesEncaminhamentos: ''
+        observacoesEncaminhamentos: '',
+        observacoesEvolucao: ''
     });
 
     // Função para calcular IMC
@@ -358,6 +359,78 @@ const ExameFisico = ({ navigation, route }) => {
         );
     };
 
+    // Funções para calcular evolução do paciente
+    const getStatusCount = (statusValue) => {
+        const statusFields = [
+            'statusHistorico', 'statusImpressao', 'statusLocalizacao', 'statusIrradiacao',
+            'statusInspecao', 'statusPalpacao', 'statusAmplitude', 'statusForca',
+            'statusCoordenacao', 'statusEquilibrio', 'statusReflexosSuperiores',
+            'statusReflexosInferiores', 'statusReflexosPatologicosExame', 'statusMarcha',
+            'statusSensibilidadeSuperficial', 'statusSensibilidadeProfunda',
+            'statusInspecaoToracica', 'statusPalpacaoRespiratoria', 'statusAuscultaRespiratoria',
+            'statusPercussao', 'statusParametrosResp', 'statusObservacoesClinicas',
+            'statusVentilacaoMecanica', 'statusSistemaRespiratorio', 'statusSistemaCardiovascular',
+            'statusSistemaGastrointestinal', 'statusSistemaNeurologico', 'statusSistemaGeniturinario',
+            'statusSistemaMusculoesqueletico', 'statusSistemaDermatologico'
+        ];
+        
+        return statusFields.filter(field => formData[field] === statusValue).length;
+    };
+
+    const getPontuacaoTotal = () => {
+        const statusFields = [
+            'statusHistorico', 'statusImpressao', 'statusLocalizacao', 'statusIrradiacao',
+            'statusInspecao', 'statusPalpacao', 'statusAmplitude', 'statusForca',
+            'statusCoordenacao', 'statusEquilibrio', 'statusReflexosSuperiores',
+            'statusReflexosInferiores', 'statusReflexosPatologicosExame', 'statusMarcha',
+            'statusSensibilidadeSuperficial', 'statusSensibilidadeProfunda',
+            'statusInspecaoToracica', 'statusPalpacaoRespiratoria', 'statusAuscultaRespiratoria',
+            'statusPercussao', 'statusParametrosResp', 'statusObservacoesClinicas',
+            'statusVentilacaoMecanica', 'statusSistemaRespiratorio', 'statusSistemaCardiovascular',
+            'statusSistemaGastrointestinal', 'statusSistemaNeurologico', 'statusSistemaGeniturinario',
+            'statusSistemaMusculoesqueletico', 'statusSistemaDermatologico'
+        ];
+        
+        return statusFields.reduce((total, field) => {
+            const value = formData[field] || 0;
+            return total + value;
+        }, 0);
+    };
+
+    const getClassificacaoEvolucao = (pontuacao) => {
+        if (pontuacao >= 20) return '🟢 Excelente';
+        if (pontuacao >= 10) return '🟡 Bom';
+        if (pontuacao >= 0) return '🟠 Regular';
+        if (pontuacao >= -10) return '🔴 Ruim';
+        return '⚫ Crítico';
+    };
+
+    const getPosicaoIndicador = () => {
+        const pontuacao = getPontuacaoTotal();
+        // Pontuação vai de -30 a +30, mapeia para 0-100%
+        const posicao = ((pontuacao + 30) / 60) * 100;
+        return Math.max(0, Math.min(100, posicao));
+    };
+
+    const getEvolucaoPorSecao = () => {
+        return [
+            { nome: 'Histórico Funcional', pontuacao: formData.statusHistorico || 0 },
+            { nome: 'Impressão Geral', pontuacao: formData.statusImpressao || 0 },
+            { nome: 'Avaliação da Dor', pontuacao: (formData.statusLocalizacao || 0) + (formData.statusIrradiacao || 0) },
+            { nome: 'Sinais Vitais', pontuacao: 0 }, // Não tem status específico
+            { nome: 'Exames Fisioterapêuticos', pontuacao: (formData.statusInspecao || 0) + (formData.statusPalpacao || 0) + (formData.statusAmplitude || 0) + (formData.statusForca || 0) + (formData.statusCoordenacao || 0) + (formData.statusEquilibrio || 0) + (formData.statusReflexosSuperiores || 0) + (formData.statusReflexosInferiores || 0) + (formData.statusReflexosPatologicosExame || 0) + (formData.statusMarcha || 0) + (formData.statusSensibilidadeSuperficial || 0) + (formData.statusSensibilidadeProfunda || 0) },
+            { nome: 'Avaliação Respiratória', pontuacao: (formData.statusInspecaoToracica || 0) + (formData.statusPalpacaoRespiratoria || 0) + (formData.statusAuscultaRespiratoria || 0) + (formData.statusPercussao || 0) + (formData.statusParametrosResp || 0) + (formData.statusObservacoesClinicas || 0) + (formData.statusVentilacaoMecanica || 0) },
+            { nome: 'Avaliação dos Sistemas', pontuacao: (formData.statusSistemaRespiratorio || 0) + (formData.statusSistemaCardiovascular || 0) + (formData.statusSistemaGastrointestinal || 0) + (formData.statusSistemaNeurologico || 0) + (formData.statusSistemaGeniturinario || 0) + (formData.statusSistemaMusculoesqueletico || 0) + (formData.statusSistemaDermatologico || 0) }
+        ];
+    };
+
+    const getCorSecao = (pontuacao) => {
+        if (pontuacao >= 2) return '#28a745'; // Verde
+        if (pontuacao >= 0) return '#ffc107'; // Amarelo
+        if (pontuacao >= -2) return '#fd7e14'; // Laranja
+        return '#dc3545'; // Vermelho
+    };
+
     // Função para salvar os dados
     const salvarExame = async () => {
         try {
@@ -388,7 +461,8 @@ const ExameFisico = ({ navigation, route }) => {
         { key: 'examesFisioterapeuticos', title: '4-5. EXAMES FISIOTERAPÊUTICOS', icon: '🔬' },
         { key: 'avaliacaoRespiratoria', title: '6. AVALIAÇÃO RESPIRATÓRIA', icon: '🫁' },
         { key: 'avaliacaoSistemas', title: '7. AVALIAÇÃO DOS SISTEMAS', icon: '⚕️' },
-        { key: 'condutaFisioterapeutica', title: '8. CONDUTA FISIOTERAPÊUTICA', icon: '🎯' }
+        { key: 'condutaFisioterapeutica', title: '8. CONDUTA FISIOTERAPÊUTICA', icon: '🎯' },
+        { key: 'evolucaoPaciente', title: '9. EVOLUÇÃO DO PACIENTE', icon: '📈' }
     ];
 
     // Função para renderizar o conteúdo específico de cada seção
@@ -1817,6 +1891,104 @@ const ExameFisico = ({ navigation, route }) => {
                         />
                     </View>
                 );
+
+            case 'evolucaoPaciente':
+                return (
+                    <View style={styles.formContent}>
+                        <Text style={styles.sectionSubtitle}>📊 EVOLUÇÃO DO PACIENTE</Text>
+                        <Text style={styles.formDescription}>
+                            Esta seção mostra o somatório dos status dos exames e a evolução geral do paciente
+                        </Text>
+
+                        {/* Resumo dos Status */}
+                        <View style={styles.evolucaoContainer}>
+                            <Text style={styles.evolucaoTitle}>Resumo dos Status dos Exames:</Text>
+                            
+                            <View style={styles.statusResumoContainer}>
+                                <View style={styles.statusResumoItem}>
+                                    <View style={[styles.statusIndicator, styles.statusBom]} />
+                                    <Text style={styles.statusResumoText}>Bom (+1): {getStatusCount(1)} exames</Text>
+                                </View>
+                                
+                                <View style={styles.statusResumoItem}>
+                                    <View style={[styles.statusIndicator, styles.statusAtencao]} />
+                                    <Text style={styles.statusResumoText}>Atenção (0): {getStatusCount(0)} exames</Text>
+                                </View>
+                                
+                                <View style={styles.statusResumoItem}>
+                                    <View style={[styles.statusIndicator, styles.statusRuim]} />
+                                    <Text style={styles.statusResumoText}>Ruim (-1): {getStatusCount(-1)} exames</Text>
+                                </View>
+                            </View>
+
+                            {/* Pontuação Total */}
+                            <View style={styles.pontuacaoContainer}>
+                                <Text style={styles.pontuacaoTitle}>Pontuação Total:</Text>
+                                <Text style={styles.pontuacaoValor}>{getPontuacaoTotal()}</Text>
+                                <Text style={styles.pontuacaoClassificacao}>
+                                    {getClassificacaoEvolucao(getPontuacaoTotal())}
+                                </Text>
+                            </View>
+                        </View>
+
+                        {/* Linha de Evolução Visual */}
+                        <View style={styles.evolucaoVisualContainer}>
+                            <Text style={styles.evolucaoVisualTitle}>Linha de Evolução:</Text>
+                            
+                            <View style={styles.evolucaoBarraContainer}>
+                                <View style={styles.evolucaoBarra}>
+                                    <View 
+                                        style={[
+                                            styles.evolucaoIndicador, 
+                                            { left: `${getPosicaoIndicador()}%` }
+                                        ]} 
+                                    />
+                                </View>
+                                
+                                <View style={styles.evolucaoLabels}>
+                                    <Text style={styles.evolucaoLabel}>Excelente</Text>
+                                    <Text style={styles.evolucaoLabel}>Bom</Text>
+                                    <Text style={styles.evolucaoLabel}>Regular</Text>
+                                    <Text style={styles.evolucaoLabel}>Ruim</Text>
+                                    <Text style={styles.evolucaoLabel}>Crítico</Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        {/* Gráfico de Evolução por Seção */}
+                        <View style={styles.graficoEvolucaoContainer}>
+                            <Text style={styles.graficoEvolucaoTitle}>Evolução por Seção:</Text>
+                            
+                            {getEvolucaoPorSecao().map((secao, index) => (
+                                <View key={index} style={styles.graficoSecaoItem}>
+                                    <Text style={styles.graficoSecaoNome}>{secao.nome}</Text>
+                                    <View style={styles.graficoSecaoBarra}>
+                                        <View 
+                                            style={[
+                                                styles.graficoSecaoIndicador,
+                                                { 
+                                                    width: `${Math.max(0, (secao.pontuacao + 3) * 16.67)}%`,
+                                                    backgroundColor: getCorSecao(secao.pontuacao)
+                                                }
+                                            ]} 
+                                        />
+                                    </View>
+                                    <Text style={styles.graficoSecaoPontuacao}>{secao.pontuacao}</Text>
+                                </View>
+                            ))}
+                        </View>
+
+                        {/* Observações da Evolução */}
+                        <Text style={styles.formLabel}>Observações da Evolução:</Text>
+                        <TextInput
+                            style={[styles.textInput, { height: 80, textAlignVertical: 'top' }]}
+                            value={formData.observacoesEvolucao}
+                            onChangeText={(text) => setFormData({...formData, observacoesEvolucao: text})}
+                            placeholder="Descreva observações sobre a evolução do paciente"
+                            multiline
+                        />
+                    </View>
+                );
                 
             default:
                 return (
@@ -2231,6 +2403,183 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 18,
         fontWeight: 'bold',
+    },
+    // Estilos para a seção de evolução do paciente
+    evolucaoContainer: {
+        backgroundColor: '#f8f9fa',
+        borderRadius: 12,
+        padding: 20,
+        marginBottom: 20,
+        borderLeftWidth: 4,
+        borderLeftColor: '#007bff',
+    },
+    evolucaoTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#343a40',
+        marginBottom: 15,
+        textAlign: 'center',
+    },
+    statusResumoContainer: {
+        marginBottom: 20,
+    },
+    statusResumoItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
+    },
+    statusIndicator: {
+        width: 16,
+        height: 16,
+        borderRadius: 8,
+        marginRight: 12,
+    },
+    statusBom: {
+        backgroundColor: '#28a745',
+    },
+    statusAtencao: {
+        backgroundColor: '#ffc107',
+    },
+    statusRuim: {
+        backgroundColor: '#dc3545',
+    },
+    statusResumoText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#343a40',
+        flex: 1,
+    },
+    pontuacaoContainer: {
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        padding: 15,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#dee2e6',
+    },
+    pontuacaoTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#6c757d',
+        marginBottom: 8,
+    },
+    pontuacaoValor: {
+        fontSize: 32,
+        fontWeight: 'bold',
+        color: '#007bff',
+        marginBottom: 5,
+    },
+    pontuacaoClassificacao: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#343a40',
+    },
+    evolucaoVisualContainer: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 20,
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
+    },
+    evolucaoVisualTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#343a40',
+        marginBottom: 15,
+        textAlign: 'center',
+    },
+    evolucaoBarraContainer: {
+        alignItems: 'center',
+    },
+    evolucaoBarra: {
+        width: '100%',
+        height: 20,
+        backgroundColor: '#e9ecef',
+        borderRadius: 10,
+        marginBottom: 15,
+        position: 'relative',
+    },
+    evolucaoIndicador: {
+        position: 'absolute',
+        top: 2,
+        width: 16,
+        height: 16,
+        backgroundColor: '#007bff',
+        borderRadius: 8,
+        borderWidth: 2,
+        borderColor: '#fff',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    evolucaoLabels: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+    },
+    evolucaoLabel: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: '#6c757d',
+        textAlign: 'center',
+        flex: 1,
+    },
+    graficoEvolucaoContainer: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 20,
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
+    },
+    graficoEvolucaoTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#343a40',
+        marginBottom: 15,
+        textAlign: 'center',
+    },
+    graficoSecaoItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+        paddingVertical: 8,
+    },
+    graficoSecaoNome: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#343a40',
+        width: '40%',
+        marginRight: 10,
+    },
+    graficoSecaoBarra: {
+        flex: 1,
+        height: 12,
+        backgroundColor: '#e9ecef',
+        borderRadius: 6,
+        marginRight: 10,
+        overflow: 'hidden',
+    },
+    graficoSecaoIndicador: {
+        height: '100%',
+        borderRadius: 6,
+        minWidth: 4,
+    },
+    graficoSecaoPontuacao: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#343a40',
+        width: '15%',
+        textAlign: 'center',
     },
 });
 
