@@ -41,10 +41,13 @@ const ExameFisico = ({ navigation, route }) => {
         statusLocalizacao: 0,
         tipoDor: [],
         observacoesTipoDor: '',
+        statusTipoDor: 0,
         intensidadeDor: [],
         observacoesIntensidade: '',
+        statusIntensidadeDor: 0,
         frequenciaDuracao: [],
         observacoesFrequencia: '',
+        statusFrequenciaDuracao: 0,
         irradiacaoDor: [],
         observacoesIrradiacao: '',
         statusIrradiacao: 0,
@@ -74,6 +77,7 @@ const ExameFisico = ({ navigation, route }) => {
         statusForca: 0,
         tonusMuscular: [],
         observacoesTonus: '',
+        statusTonusMuscular: 0,
         coordenacao: {
             dedoNariz: '',
             indexIndex: '',
@@ -112,6 +116,8 @@ const ExameFisico = ({ navigation, route }) => {
             barre: '',
             mingazzini: ''
         },
+        observacoesManobrasDeficitarias: '',
+        statusManobrasDeficitarias: 0,
         tiposMarcha: [],
         observacoesMarcha: '',
         statusMarcha: 0,
@@ -233,6 +239,7 @@ const ExameFisico = ({ navigation, route }) => {
         encaminhamentos: [],
         outrosEncaminhamentos: '',
         observacoesEncaminhamentos: '',
+        statusConduta: 0,
         observacoesEvolucao: ''
     });
 
@@ -361,37 +368,44 @@ const ExameFisico = ({ navigation, route }) => {
 
     // Funções para calcular evolução do paciente
     const getStatusCount = (statusValue) => {
-        const statusFields = [
-            'statusHistorico', 'statusImpressao', 'statusLocalizacao', 'statusIrradiacao',
+        // Lista completa de todos os campos de status
+        const allStatusFields = [
+            'statusHistorico', 'statusImpressao', 'statusLocalizacao', 'statusTipoDor',
+            'statusIntensidadeDor', 'statusFrequenciaDuracao', 'statusIrradiacao',
             'statusInspecao', 'statusPalpacao', 'statusAmplitude', 'statusForca',
-            'statusCoordenacao', 'statusEquilibrio', 'statusReflexosSuperiores',
-            'statusReflexosInferiores', 'statusReflexosPatologicosExame', 'statusMarcha',
-            'statusSensibilidadeSuperficial', 'statusSensibilidadeProfunda',
-            'statusInspecaoToracica', 'statusPalpacaoRespiratoria', 'statusAuscultaRespiratoria',
-            'statusPercussao', 'statusParametrosResp', 'statusObservacoesClinicas',
-            'statusVentilacaoMecanica', 'statusSistemaRespiratorio', 'statusSistemaCardiovascular',
-            'statusSistemaGastrointestinal', 'statusSistemaNeurologico', 'statusSistemaGeniturinario',
-            'statusSistemaMusculoesqueletico', 'statusSistemaDermatologico'
+            'statusTonusMuscular', 'statusCoordenacao', 'statusEquilibrio',
+            'statusReflexosSuperiores', 'statusReflexosInferiores', 'statusReflexosPatologicosExame',
+            'statusManobrasDeficitarias', 'statusMarcha', 'statusSensibilidadeSuperficial',
+            'statusSensibilidadeProfunda', 'statusInspecaoToracica', 'statusPalpacaoRespiratoria',
+            'statusAuscultaRespiratoria', 'statusPercussao', 'statusParametrosResp',
+            'statusObservacoesClinicas', 'statusVentilacaoMecanica', 'statusSistemaRespiratorio',
+            'statusSistemaCardiovascular', 'statusSistemaGastrointestinal', 'statusSistemaNeurologico',
+            'statusSistemaGeniturinario', 'statusSistemaMusculoesqueletico', 'statusSistemaDermatologico',
+            'statusConduta'
         ];
         
-        return statusFields.filter(field => formData[field] === statusValue).length;
+        return allStatusFields.filter(field => formData[field] === statusValue).length;
     };
 
     const getPontuacaoTotal = () => {
-        const statusFields = [
-            'statusHistorico', 'statusImpressao', 'statusLocalizacao', 'statusIrradiacao',
+        // Lista completa de todos os campos de status
+        const allStatusFields = [
+            'statusHistorico', 'statusImpressao', 'statusLocalizacao', 'statusTipoDor',
+            'statusIntensidadeDor', 'statusFrequenciaDuracao', 'statusIrradiacao',
             'statusInspecao', 'statusPalpacao', 'statusAmplitude', 'statusForca',
-            'statusCoordenacao', 'statusEquilibrio', 'statusReflexosSuperiores',
-            'statusReflexosInferiores', 'statusReflexosPatologicosExame', 'statusMarcha',
-            'statusSensibilidadeSuperficial', 'statusSensibilidadeProfunda',
-            'statusInspecaoToracica', 'statusPalpacaoRespiratoria', 'statusAuscultaRespiratoria',
-            'statusPercussao', 'statusParametrosResp', 'statusObservacoesClinicas',
-            'statusVentilacaoMecanica', 'statusSistemaRespiratorio', 'statusSistemaCardiovascular',
-            'statusSistemaGastrointestinal', 'statusSistemaNeurologico', 'statusSistemaGeniturinario',
-            'statusSistemaMusculoesqueletico', 'statusSistemaDermatologico'
+            'statusTonusMuscular', 'statusCoordenacao', 'statusEquilibrio',
+            'statusReflexosSuperiores', 'statusReflexosInferiores', 'statusReflexosPatologicosExame',
+            'statusManobrasDeficitarias', 'statusMarcha', 'statusSensibilidadeSuperficial',
+            'statusSensibilidadeProfunda', 'statusInspecaoToracica', 'statusPalpacaoRespiratoria',
+            'statusAuscultaRespiratoria', 'statusPercussao', 'statusParametrosResp',
+            'statusObservacoesClinicas', 'statusVentilacaoMecanica', 'statusSistemaRespiratorio',
+            'statusSistemaCardiovascular', 'statusSistemaGastrointestinal', 'statusSistemaNeurologico',
+            'statusSistemaGeniturinario', 'statusSistemaMusculoesqueletico', 'statusSistemaDermatologico',
+            'statusConduta'
         ];
         
-        return statusFields.reduce((total, field) => {
+        // Calcula a pontuação total somando todos os status
+        return allStatusFields.reduce((total, field) => {
             const value = formData[field] || 0;
             return total + value;
         }, 0);
@@ -408,6 +422,7 @@ const ExameFisico = ({ navigation, route }) => {
     const getPosicaoIndicador = () => {
         const pontuacao = getPontuacaoTotal();
         // Pontuação vai de -30 a +30, mapeia para 0-100%
+        // -30 (crítico) = 0% (esquerda), +30 (excelente) = 100% (direita)
         const posicao = ((pontuacao + 30) / 60) * 100;
         return Math.max(0, Math.min(100, posicao));
     };
@@ -416,11 +431,12 @@ const ExameFisico = ({ navigation, route }) => {
         return [
             { nome: 'Histórico Funcional', pontuacao: formData.statusHistorico || 0 },
             { nome: 'Impressão Geral', pontuacao: formData.statusImpressao || 0 },
-            { nome: 'Avaliação da Dor', pontuacao: (formData.statusLocalizacao || 0) + (formData.statusIrradiacao || 0) },
+            { nome: 'Avaliação da Dor', pontuacao: (formData.statusLocalizacao || 0) + (formData.statusTipoDor || 0) + (formData.statusIntensidadeDor || 0) + (formData.statusFrequenciaDuracao || 0) + (formData.statusIrradiacao || 0) },
             { nome: 'Sinais Vitais', pontuacao: 0 }, // Não tem status específico
-            { nome: 'Exames Fisioterapêuticos', pontuacao: (formData.statusInspecao || 0) + (formData.statusPalpacao || 0) + (formData.statusAmplitude || 0) + (formData.statusForca || 0) + (formData.statusCoordenacao || 0) + (formData.statusEquilibrio || 0) + (formData.statusReflexosSuperiores || 0) + (formData.statusReflexosInferiores || 0) + (formData.statusReflexosPatologicosExame || 0) + (formData.statusMarcha || 0) + (formData.statusSensibilidadeSuperficial || 0) + (formData.statusSensibilidadeProfunda || 0) },
+            { nome: 'Exames Fisioterapêuticos', pontuacao: (formData.statusInspecao || 0) + (formData.statusPalpacao || 0) + (formData.statusAmplitude || 0) + (formData.statusForca || 0) + (formData.statusTonusMuscular || 0) + (formData.statusCoordenacao || 0) + (formData.statusEquilibrio || 0) + (formData.statusReflexosSuperiores || 0) + (formData.statusReflexosInferiores || 0) + (formData.statusReflexosPatologicosExame || 0) + (formData.statusManobrasDeficitarias || 0) + (formData.statusMarcha || 0) + (formData.statusSensibilidadeSuperficial || 0) + (formData.statusSensibilidadeProfunda || 0) },
             { nome: 'Avaliação Respiratória', pontuacao: (formData.statusInspecaoToracica || 0) + (formData.statusPalpacaoRespiratoria || 0) + (formData.statusAuscultaRespiratoria || 0) + (formData.statusPercussao || 0) + (formData.statusParametrosResp || 0) + (formData.statusObservacoesClinicas || 0) + (formData.statusVentilacaoMecanica || 0) },
-            { nome: 'Avaliação dos Sistemas', pontuacao: (formData.statusSistemaRespiratorio || 0) + (formData.statusSistemaCardiovascular || 0) + (formData.statusSistemaGastrointestinal || 0) + (formData.statusSistemaNeurologico || 0) + (formData.statusSistemaGeniturinario || 0) + (formData.statusSistemaMusculoesqueletico || 0) + (formData.statusSistemaDermatologico || 0) }
+            { nome: 'Avaliação dos Sistemas', pontuacao: (formData.statusSistemaRespiratorio || 0) + (formData.statusSistemaCardiovascular || 0) + (formData.statusSistemaGastrointestinal || 0) + (formData.statusSistemaNeurologico || 0) + (formData.statusSistemaGeniturinario || 0) + (formData.statusSistemaMusculoesqueletico || 0) + (formData.statusSistemaDermatologico || 0) },
+            { nome: 'Conduta Fisioterapêutica', pontuacao: formData.statusConduta || 0 }
         ];
     };
 
@@ -429,6 +445,30 @@ const ExameFisico = ({ navigation, route }) => {
         if (pontuacao >= 0) return '#ffc107'; // Amarelo
         if (pontuacao >= -2) return '#fd7e14'; // Laranja
         return '#dc3545'; // Vermelho
+    };
+
+    // Função para debug - mostra todos os campos de status e seus valores
+    const debugStatusFields = () => {
+        const allStatusFields = [
+            'statusHistorico', 'statusImpressao', 'statusLocalizacao', 'statusTipoDor',
+            'statusIntensidadeDor', 'statusFrequenciaDuracao', 'statusIrradiacao',
+            'statusInspecao', 'statusPalpacao', 'statusAmplitude', 'statusForca',
+            'statusTonusMuscular', 'statusCoordenacao', 'statusEquilibrio',
+            'statusReflexosSuperiores', 'statusReflexosInferiores', 'statusReflexosPatologicosExame',
+            'statusManobrasDeficitarias', 'statusMarcha', 'statusSensibilidadeSuperficial',
+            'statusSensibilidadeProfunda', 'statusInspecaoToracica', 'statusPalpacaoRespiratoria',
+            'statusAuscultaRespiratoria', 'statusPercussao', 'statusParametrosResp',
+            'statusObservacoesClinicas', 'statusVentilacaoMecanica', 'statusSistemaRespiratorio',
+            'statusSistemaCardiovascular', 'statusSistemaGastrointestinal', 'statusSistemaNeurologico',
+            'statusSistemaGeniturinario', 'statusSistemaMusculoesqueletico', 'statusSistemaDermatologico',
+            'statusConduta'
+        ];
+        
+        console.log('=== DEBUG: TODOS OS CAMPOS DE STATUS ===');
+        allStatusFields.forEach(field => {
+            console.log(`${field}: ${formData[field] || 0}`);
+        });
+        console.log('=== PONTUAÇÃO TOTAL:', getPontuacaoTotal(), '===');
     };
 
     // Função para salvar os dados
@@ -1946,11 +1986,11 @@ const ExameFisico = ({ navigation, route }) => {
                                 </View>
                                 
                                 <View style={styles.evolucaoLabels}>
-                                    <Text style={styles.evolucaoLabel}>Excelente</Text>
-                                    <Text style={styles.evolucaoLabel}>Bom</Text>
-                                    <Text style={styles.evolucaoLabel}>Regular</Text>
-                                    <Text style={styles.evolucaoLabel}>Ruim</Text>
                                     <Text style={styles.evolucaoLabel}>Crítico</Text>
+                                    <Text style={styles.evolucaoLabel}>Ruim</Text>
+                                    <Text style={styles.evolucaoLabel}>Regular</Text>
+                                    <Text style={styles.evolucaoLabel}>Bom</Text>
+                                    <Text style={styles.evolucaoLabel}>Excelente</Text>
                                 </View>
                             </View>
                         </View>
@@ -1977,6 +2017,13 @@ const ExameFisico = ({ navigation, route }) => {
                                 </View>
                             ))}
                         </View>
+
+                        {/* Botão de Debug */}
+                        <TouchableOpacity 
+                            style={[styles.button, { backgroundColor: '#6c757d', marginTop: 20 }]}
+                            onPress={debugStatusFields}
+                        >
+                        </TouchableOpacity>
 
                         {/* Observações da Evolução */}
                         <Text style={styles.formLabel}>Observações da Evolução:</Text>
