@@ -4092,57 +4092,630 @@ const ExamesComplementares = ({ navigation, route }) => {
             case 'ortopedicos':
                 return (
                     <View style={styles.formContent}>
+                        {/* Radiografias Específicas */}
+                        <View style={styles.sectionTitle}>
+                            <Text style={styles.sectionTitleText}>Radiografias Específicas</Text>
+                        </View>
+                        
                         <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Radiografia de Ossos:</Text>
+                            <Text style={styles.formLabel}>Data de Realização:</Text>
                             <TextInput
-                                style={[styles.textInput, { height: 80, textAlignVertical: 'top' }]}
-                                value={formData.radiografiaOssos}
-                                onChangeText={(text) => setFormData({...formData, radiografiaOssos: text})}
-                                placeholder="Resultado da radiografia óssea"
+                                style={styles.textInput}
+                                value={formData.radiografiasEspecificasDataRealizacao}
+                                onChangeText={(text) => setFormData({...formData, radiografiasEspecificasDataRealizacao: text})}
+                                placeholder="DD/MM/AAAA"
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Resultados Obtidos:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.radiografiasEspecificasResultadosObtidos}
+                                onChangeText={(text) => setFormData({...formData, radiografiasEspecificasResultadosObtidos: text})}
+                                placeholder="Resultados obtidos das radiografias específicas"
                                 multiline
                             />
                         </View>
                         
                         <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Densitometria Óssea:</Text>
+                            <Text style={styles.formLabel}>Observações Clínicas:</Text>
                             <TextInput
-                                style={[styles.textInput, { height: 80, textAlignVertical: 'top' }]}
-                                value={formData.densitometria}
-                                onChangeText={(text) => setFormData({...formData, densitometria: text})}
-                                placeholder="Resultado da densitometria"
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.radiografiasEspecificasObservacoesClinicas}
+                                onChangeText={(text) => setFormData({...formData, radiografiasEspecificasObservacoesClinicas: text})}
+                                placeholder="Observações clínicas sobre as radiografias específicas"
                                 multiline
                             />
                         </View>
                         
                         <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Ressonância Articular:</Text>
+                            <Text style={styles.formLabel}>Evolução do Paciente:</Text>
                             <TextInput
-                                style={[styles.textInput, { height: 80, textAlignVertical: 'top' }]}
-                                value={formData.ressonanciaArticular}
-                                onChangeText={(text) => setFormData({...formData, ressonanciaArticular: text})}
-                                placeholder="Resultado da ressonância articular"
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.radiografiasEspecificasEvolucaoPaciente}
+                                onChangeText={(text) => setFormData({...formData, radiografiasEspecificasEvolucaoPaciente: text})}
+                                placeholder="Evolução do paciente baseada nas radiografias específicas"
                                 multiline
                             />
                         </View>
                         
                         <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Artroscopia:</Text>
+                            <Text style={styles.formLabel}>Status do Exame:</Text>
+                            <View style={styles.statusButtons}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.radiografiasEspecificasStatus === 'bom' && styles.statusButtonBom
+                                    ]}
+                                    onPress={() => setFormData({...formData, radiografiasEspecificasStatus: 'bom'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.radiografiasEspecificasStatus === 'bom' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Bom (+1)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.radiografiasEspecificasStatus === 'atencao' && styles.statusButtonAtencao
+                                    ]}
+                                    onPress={() => setFormData({...formData, radiografiasEspecificasStatus: 'atencao'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.radiografiasEspecificasStatus === 'atencao' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Atenção (0)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.radiografiasEspecificasStatus === 'ruim' && styles.statusButtonRuim
+                                    ]}
+                                    onPress={() => setFormData({...formData, radiografiasEspecificasStatus: 'ruim'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.radiografiasEspecificasStatus === 'ruim' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Ruim (-1)
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        
+                        {/* Separador */}
+                        <View style={styles.separator} />
+                        
+                        {/* Ressonância Magnética Articular */}
+                        <View style={styles.sectionTitle}>
+                            <Text style={styles.sectionTitleText}>Ressonância Magnética Articular</Text>
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Data de Realização:</Text>
                             <TextInput
-                                style={[styles.textInput, { height: 80, textAlignVertical: 'top' }]}
-                                value={formData.artroscopia}
-                                onChangeText={(text) => setFormData({...formData, artroscopia: text})}
-                                placeholder="Resultado da artroscopia"
+                                style={styles.textInput}
+                                value={formData.ressonanciaArticularDataRealizacao}
+                                onChangeText={(text) => setFormData({...formData, ressonanciaArticularDataRealizacao: text})}
+                                placeholder="DD/MM/AAAA"
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Resultados Obtidos:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.ressonanciaArticularResultadosObtidos}
+                                onChangeText={(text) => setFormData({...formData, ressonanciaArticularResultadosObtidos: text})}
+                                placeholder="Resultados obtidos da ressonância magnética articular"
                                 multiline
                             />
                         </View>
                         
                         <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Outros Exames Ortopédicos:</Text>
+                            <Text style={styles.formLabel}>Observações Clínicas:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.ressonanciaArticularObservacoesClinicas}
+                                onChangeText={(text) => setFormData({...formData, ressonanciaArticularObservacoesClinicas: text})}
+                                placeholder="Observações clínicas sobre a ressonância magnética articular"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Evolução do Paciente:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.ressonanciaArticularEvolucaoPaciente}
+                                onChangeText={(text) => setFormData({...formData, ressonanciaArticularEvolucaoPaciente: text})}
+                                placeholder="Evolução do paciente baseada na ressonância magnética articular"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Status do Exame:</Text>
+                            <View style={styles.statusButtons}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.ressonanciaArticularStatus === 'bom' && styles.statusButtonBom
+                                    ]}
+                                    onPress={() => setFormData({...formData, ressonanciaArticularStatus: 'bom'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.ressonanciaArticularStatus === 'bom' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Bom (+1)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.ressonanciaArticularStatus === 'atencao' && styles.statusButtonAtencao
+                                    ]}
+                                    onPress={() => setFormData({...formData, ressonanciaArticularStatus: 'atencao'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.ressonanciaArticularStatus === 'atencao' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Atenção (0)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.ressonanciaArticularStatus === 'ruim' && styles.statusButtonRuim
+                                    ]}
+                                    onPress={() => setFormData({...formData, ressonanciaArticularStatus: 'ruim'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.ressonanciaArticularStatus === 'ruim' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Ruim (-1)
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        
+                        {/* Separador */}
+                        <View style={styles.separator} />
+                        
+                        {/* Ultrassonografia Musculoesquelética */}
+                        <View style={styles.sectionTitle}>
+                            <Text style={styles.sectionTitleText}>Ultrassonografia Musculoesquelética</Text>
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Data de Realização:</Text>
+                            <TextInput
+                                style={styles.textInput}
+                                value={formData.ultrassonografiaMusculoesqueleticaDataRealizacao}
+                                onChangeText={(text) => setFormData({...formData, ultrassonografiaMusculoesqueleticaDataRealizacao: text})}
+                                placeholder="DD/MM/AAAA"
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Resultados Obtidos:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.ultrassonografiaMusculoesqueleticaResultadosObtidos}
+                                onChangeText={(text) => setFormData({...formData, ultrassonografiaMusculoesqueleticaResultadosObtidos: text})}
+                                placeholder="Resultados obtidos da ultrassonografia musculoesquelética"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Observações Clínicas:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.ultrassonografiaMusculoesqueleticaObservacoesClinicas}
+                                onChangeText={(text) => setFormData({...formData, ultrassonografiaMusculoesqueleticaObservacoesClinicas: text})}
+                                placeholder="Observações clínicas sobre a ultrassonografia musculoesquelética"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Evolução do Paciente:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.ultrassonografiaMusculoesqueleticaEvolucaoPaciente}
+                                onChangeText={(text) => setFormData({...formData, ultrassonografiaMusculoesqueleticaEvolucaoPaciente: text})}
+                                placeholder="Evolução do paciente baseada na ultrassonografia musculoesquelética"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Status do Exame:</Text>
+                            <View style={styles.statusButtons}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.ultrassonografiaMusculoesqueleticaStatus === 'bom' && styles.statusButtonBom
+                                    ]}
+                                    onPress={() => setFormData({...formData, ultrassonografiaMusculoesqueleticaStatus: 'bom'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.ultrassonografiaMusculoesqueleticaStatus === 'bom' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Bom (+1)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.ultrassonografiaMusculoesqueleticaStatus === 'atencao' && styles.statusButtonAtencao
+                                    ]}
+                                    onPress={() => setFormData({...formData, ultrassonografiaMusculoesqueleticaStatus: 'atencao'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.ultrassonografiaMusculoesqueleticaStatus === 'atencao' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Atenção (0)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.ultrassonografiaMusculoesqueleticaStatus === 'ruim' && styles.statusButtonRuim
+                                    ]}
+                                    onPress={() => setFormData({...formData, ultrassonografiaMusculoesqueleticaStatus: 'ruim'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.ultrassonografiaMusculoesqueleticaStatus === 'ruim' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Ruim (-1)
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        
+                        {/* Separador */}
+                        <View style={styles.separator} />
+                        
+                        {/* Densitometria Óssea */}
+                        <View style={styles.sectionTitle}>
+                            <Text style={styles.sectionTitleText}>Densitometria Óssea</Text>
+                        </View>
+                        
+                        {/* Valores de Referência */}
+                        <View style={styles.referenceValues}>
+                            <Text style={styles.referenceTitle}>Valores de Referência:</Text>
+                            <Text style={styles.referenceText}>• T-score &gt; -1.0 (Normal)</Text>
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Data de Realização:</Text>
+                            <TextInput
+                                style={styles.textInput}
+                                value={formData.densitometriaOsseaDataRealizacao}
+                                onChangeText={(text) => setFormData({...formData, densitometriaOsseaDataRealizacao: text})}
+                                placeholder="DD/MM/AAAA"
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Resultados Obtidos:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.densitometriaOsseaResultadosObtidos}
+                                onChangeText={(text) => setFormData({...formData, densitometriaOsseaResultadosObtidos: text})}
+                                placeholder="Resultados obtidos da densitometria óssea"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Observações Clínicas:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.densitometriaOsseaObservacoesClinicas}
+                                onChangeText={(text) => setFormData({...formData, densitometriaOsseaObservacoesClinicas: text})}
+                                placeholder="Observações clínicas sobre a densitometria óssea"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Evolução do Paciente:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.densitometriaOsseaEvolucaoPaciente}
+                                onChangeText={(text) => setFormData({...formData, densitometriaOsseaEvolucaoPaciente: text})}
+                                placeholder="Evolução do paciente baseada na densitometria óssea"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Status do Exame:</Text>
+                            <View style={styles.statusButtons}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.densitometriaOsseaStatus === 'bom' && styles.statusButtonBom
+                                    ]}
+                                    onPress={() => setFormData({...formData, densitometriaOsseaStatus: 'bom'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.densitometriaOsseaStatus === 'bom' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Bom (+1)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.densitometriaOsseaStatus === 'atencao' && styles.statusButtonAtencao
+                                    ]}
+                                    onPress={() => setFormData({...formData, densitometriaOsseaStatus: 'atencao'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.densitometriaOsseaStatus === 'atencao' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Atenção (0)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.densitometriaOsseaStatus === 'ruim' && styles.statusButtonRuim
+                                    ]}
+                                    onPress={() => setFormData({...formData, densitometriaOsseaStatus: 'ruim'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.densitometriaOsseaStatus === 'ruim' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Ruim (-1)
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        
+                        {/* Separador */}
+                        <View style={styles.separator} />
+                        
+                        {/* Avaliação Postural por Fotogrametria */}
+                        <View style={styles.sectionTitle}>
+                            <Text style={styles.sectionTitleText}>Avaliação Postural por Fotogrametria</Text>
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Data de Realização:</Text>
+                            <TextInput
+                                style={styles.textInput}
+                                value={formData.avaliacaoPosturalDataRealizacao}
+                                onChangeText={(text) => setFormData({...formData, avaliacaoPosturalDataRealizacao: text})}
+                                placeholder="DD/MM/AAAA"
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Resultados Obtidos:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.avaliacaoPosturalResultadosObtidos}
+                                onChangeText={(text) => setFormData({...formData, avaliacaoPosturalResultadosObtidos: text})}
+                                placeholder="Resultados obtidos da avaliação postural por fotogrametria"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Observações Clínicas:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.avaliacaoPosturalObservacoesClinicas}
+                                onChangeText={(text) => setFormData({...formData, avaliacaoPosturalObservacoesClinicas: text})}
+                                placeholder="Observações clínicas sobre a avaliação postural por fotogrametria"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Evolução do Paciente:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.avaliacaoPosturalEvolucaoPaciente}
+                                onChangeText={(text) => setFormData({...formData, avaliacaoPosturalEvolucaoPaciente: text})}
+                                placeholder="Evolução do paciente baseada na avaliação postural por fotogrametria"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Status do Exame:</Text>
+                            <View style={styles.statusButtons}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.avaliacaoPosturalStatus === 'bom' && styles.statusButtonBom
+                                    ]}
+                                    onPress={() => setFormData({...formData, avaliacaoPosturalStatus: 'bom'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.avaliacaoPosturalStatus === 'bom' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Bom (+1)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.avaliacaoPosturalStatus === 'atencao' && styles.statusButtonAtencao
+                                    ]}
+                                    onPress={() => setFormData({...formData, avaliacaoPosturalStatus: 'atencao'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.avaliacaoPosturalStatus === 'atencao' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Atenção (0)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.avaliacaoPosturalStatus === 'ruim' && styles.statusButtonRuim
+                                    ]}
+                                    onPress={() => setFormData({...formData, avaliacaoPosturalStatus: 'ruim'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.avaliacaoPosturalStatus === 'ruim' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Ruim (-1)
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        
+                        {/* Separador */}
+                        <View style={styles.separator} />
+                        
+                        {/* Baropodometria (Análise da Pisada) */}
+                        <View style={styles.sectionTitle}>
+                            <Text style={styles.sectionTitleText}>Baropodometria (Análise da Pisada)</Text>
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Data de Realização:</Text>
+                            <TextInput
+                                style={styles.textInput}
+                                value={formData.baropodometriaDataRealizacao}
+                                onChangeText={(text) => setFormData({...formData, baropodometriaDataRealizacao: text})}
+                                placeholder="DD/MM/AAAA"
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Resultados Obtidos:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.baropodometriaResultadosObtidos}
+                                onChangeText={(text) => setFormData({...formData, baropodometriaResultadosObtidos: text})}
+                                placeholder="Resultados obtidos da baropodometria (análise da pisada)"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Observações Clínicas:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.baropodometriaObservacoesClinicas}
+                                onChangeText={(text) => setFormData({...formData, baropodometriaObservacoesClinicas: text})}
+                                placeholder="Observações clínicas sobre a baropodometria (análise da pisada)"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Evolução do Paciente:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.baropodometriaEvolucaoPaciente}
+                                onChangeText={(text) => setFormData({...formData, baropodometriaEvolucaoPaciente: text})}
+                                placeholder="Evolução do paciente baseada na baropodometria (análise da pisada)"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Status do Exame:</Text>
+                            <View style={styles.statusButtons}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.baropodometriaStatus === 'bom' && styles.statusButtonBom
+                                    ]}
+                                    onPress={() => setFormData({...formData, baropodometriaStatus: 'bom'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.baropodometriaStatus === 'bom' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Bom (+1)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.baropodometriaStatus === 'atencao' && styles.statusButtonAtencao
+                                    ]}
+                                    onPress={() => setFormData({...formData, baropodometriaStatus: 'atencao'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.baropodometriaStatus === 'atencao' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Atenção (0)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.baropodometriaStatus === 'ruim' && styles.statusButtonRuim
+                                    ]}
+                                    onPress={() => setFormData({...formData, baropodometriaStatus: 'ruim'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.baropodometriaStatus === 'ruim' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Ruim (-1)
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        
+                        {/* Separador */}
+                        <View style={styles.separator} />
+                        
+                        {/* Outros Exames Ortopédicos e Funcionais */}
+                        <View style={styles.sectionTitle}>
+                            <Text style={styles.sectionTitleText}>Outros Exames Ortopédicos e Funcionais</Text>
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Outros Exames Ortopédicos e Funcionais:</Text>
                             <TextInput
                                 style={[styles.textInput, { height: 80, textAlignVertical: 'top' }]}
                                 value={formData.outrosOrtopedicos}
                                 onChangeText={(text) => setFormData({...formData, outrosOrtopedicos: text})}
-                                placeholder="Outros exames ortopédicos realizados"
+                                placeholder="Outros exames ortopédicos e funcionais realizados"
                                 multiline
                             />
                         </View>
@@ -4152,68 +4725,536 @@ const ExamesComplementares = ({ navigation, route }) => {
             case 'urologicos':
                 return (
                     <View style={styles.formContent}>
+                        {/* Exame de Urina */}
+                        <View style={styles.sectionTitle}>
+                            <Text style={styles.sectionTitleText}>Exame de Urina</Text>
+                        </View>
+                        
+                        {/* Valores de Referência */}
+                        <View style={styles.referenceValues}>
+                            <Text style={styles.referenceTitle}>Valores de Referência:</Text>
+                            <Text style={styles.referenceText}>• Densidade: 1.005-1.030</Text>
+                            <Text style={styles.referenceText}>• pH: 4.5-8.0</Text>
+                        </View>
+                        
                         <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Ultrassom Abdominal:</Text>
+                            <Text style={styles.formLabel}>Data de Realização:</Text>
                             <TextInput
-                                style={[styles.textInput, { height: 80, textAlignVertical: 'top' }]}
-                                value={formData.ultrassomAbdominal}
-                                onChangeText={(text) => setFormData({...formData, ultrassomAbdominal: text})}
-                                placeholder="Resultado do ultrassom abdominal"
+                                style={styles.textInput}
+                                value={formData.exameUrinaDataRealizacao}
+                                onChangeText={(text) => setFormData({...formData, exameUrinaDataRealizacao: text})}
+                                placeholder="DD/MM/AAAA"
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Resultados Obtidos:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.exameUrinaResultadosObtidos}
+                                onChangeText={(text) => setFormData({...formData, exameUrinaResultadosObtidos: text})}
+                                placeholder="Resultados obtidos do exame de urina"
                                 multiline
                             />
                         </View>
                         
                         <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Urofluxometria:</Text>
+                            <Text style={styles.formLabel}>Observações Clínicas:</Text>
                             <TextInput
-                                style={[styles.textInput, { height: 80, textAlignVertical: 'top' }]}
-                                value={formData.urofluxometria}
-                                onChangeText={(text) => setFormData({...formData, urofluxometria: text})}
-                                placeholder="Resultado da urofluxometria"
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.exameUrinaObservacoesClinicas}
+                                onChangeText={(text) => setFormData({...formData, exameUrinaObservacoesClinicas: text})}
+                                placeholder="Observações clínicas sobre o exame de urina"
                                 multiline
                             />
                         </View>
                         
                         <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Cistoscopia:</Text>
+                            <Text style={styles.formLabel}>Evolução do Paciente:</Text>
                             <TextInput
-                                style={[styles.textInput, { height: 80, textAlignVertical: 'top' }]}
-                                value={formData.citoscopia}
-                                onChangeText={(text) => setFormData({...formData, citoscopia: text})}
-                                placeholder="Resultado da cistoscopia"
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.exameUrinaEvolucaoPaciente}
+                                onChangeText={(text) => setFormData({...formData, exameUrinaEvolucaoPaciente: text})}
+                                placeholder="Evolução do paciente baseada no exame de urina"
                                 multiline
                             />
                         </View>
                         
                         <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Ultrassom Pélvico:</Text>
+                            <Text style={styles.formLabel}>Status do Exame:</Text>
+                            <View style={styles.statusButtons}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.exameUrinaStatus === 'bom' && styles.statusButtonBom
+                                    ]}
+                                    onPress={() => setFormData({...formData, exameUrinaStatus: 'bom'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.exameUrinaStatus === 'bom' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Bom (+1)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.exameUrinaStatus === 'atencao' && styles.statusButtonAtencao
+                                    ]}
+                                    onPress={() => setFormData({...formData, exameUrinaStatus: 'atencao'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.exameUrinaStatus === 'atencao' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Atenção (0)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.exameUrinaStatus === 'ruim' && styles.statusButtonRuim
+                                    ]}
+                                    onPress={() => setFormData({...formData, exameUrinaStatus: 'ruim'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.exameUrinaStatus === 'ruim' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Ruim (-1)
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        
+                        {/* Separador */}
+                        <View style={styles.separator} />
+                        
+                        {/* Ultrassonografia Pélvica/Transvaginal */}
+                        <View style={styles.sectionTitle}>
+                            <Text style={styles.sectionTitleText}>Ultrassonografia Pélvica/Transvaginal</Text>
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Data de Realização:</Text>
                             <TextInput
-                                style={[styles.textInput, { height: 80, textAlignVertical: 'top' }]}
-                                value={formData.ultrassomPelvico}
-                                onChangeText={(text) => setFormData({...formData, ultrassomPelvico: text})}
-                                placeholder="Resultado do ultrassom pélvico"
+                                style={styles.textInput}
+                                value={formData.ultrassonografiaPelvicaDataRealizacao}
+                                onChangeText={(text) => setFormData({...formData, ultrassonografiaPelvicaDataRealizacao: text})}
+                                placeholder="DD/MM/AAAA"
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Resultados Obtidos:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.ultrassonografiaPelvicaResultadosObtidos}
+                                onChangeText={(text) => setFormData({...formData, ultrassonografiaPelvicaResultadosObtidos: text})}
+                                placeholder="Resultados obtidos da ultrassonografia pélvica/transvaginal"
                                 multiline
                             />
                         </View>
                         
                         <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Papanicolau:</Text>
+                            <Text style={styles.formLabel}>Observações Clínicas:</Text>
                             <TextInput
-                                style={[styles.textInput, { height: 80, textAlignVertical: 'top' }]}
-                                value={formData.papanicolau}
-                                onChangeText={(text) => setFormData({...formData, papanicolau: text})}
-                                placeholder="Resultado do papanicolau"
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.ultrassonografiaPelvicaObservacoesClinicas}
+                                onChangeText={(text) => setFormData({...formData, ultrassonografiaPelvicaObservacoesClinicas: text})}
+                                placeholder="Observações clínicas sobre a ultrassonografia pélvica/transvaginal"
                                 multiline
                             />
                         </View>
                         
                         <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Outros Exames Urológicos/Ginecológicos:</Text>
+                            <Text style={styles.formLabel}>Evolução do Paciente:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.ultrassonografiaPelvicaEvolucaoPaciente}
+                                onChangeText={(text) => setFormData({...formData, ultrassonografiaPelvicaEvolucaoPaciente: text})}
+                                placeholder="Evolução do paciente baseada na ultrassonografia pélvica/transvaginal"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Status do Exame:</Text>
+                            <View style={styles.statusButtons}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.ultrassonografiaPelvicaStatus === 'bom' && styles.statusButtonBom
+                                    ]}
+                                    onPress={() => setFormData({...formData, ultrassonografiaPelvicaStatus: 'bom'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.ultrassonografiaPelvicaStatus === 'bom' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Bom (+1)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.ultrassonografiaPelvicaStatus === 'atencao' && styles.statusButtonAtencao
+                                    ]}
+                                    onPress={() => setFormData({...formData, ultrassonografiaPelvicaStatus: 'atencao'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.ultrassonografiaPelvicaStatus === 'atencao' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Atenção (0)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.ultrassonografiaPelvicaStatus === 'ruim' && styles.statusButtonRuim
+                                    ]}
+                                    onPress={() => setFormData({...formData, ultrassonografiaPelvicaStatus: 'ruim'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.ultrassonografiaPelvicaStatus === 'ruim' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Ruim (-1)
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        
+                        {/* Separador */}
+                        <View style={styles.separator} />
+                        
+                        {/* PSA (Antígeno Prostático Específico) */}
+                        <View style={styles.sectionTitle}>
+                            <Text style={styles.sectionTitleText}>PSA (Antígeno Prostático Específico)</Text>
+                        </View>
+                        
+                        {/* Valores de Referência */}
+                        <View style={styles.referenceValues}>
+                            <Text style={styles.referenceTitle}>Valores de Referência:</Text>
+                            <Text style={styles.referenceText}>• &lt; 4.0 ng/mL</Text>
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Data de Realização:</Text>
+                            <TextInput
+                                style={styles.textInput}
+                                value={formData.psaDataRealizacao}
+                                onChangeText={(text) => setFormData({...formData, psaDataRealizacao: text})}
+                                placeholder="DD/MM/AAAA"
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Resultados Obtidos:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.psaResultadosObtidos}
+                                onChangeText={(text) => setFormData({...formData, psaResultadosObtidos: text})}
+                                placeholder="Resultados obtidos do PSA (antígeno prostático específico)"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Observações Clínicas:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.psaObservacoesClinicas}
+                                onChangeText={(text) => setFormData({...formData, psaObservacoesClinicas: text})}
+                                placeholder="Observações clínicas sobre o PSA (antígeno prostático específico)"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Evolução do Paciente:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.psaEvolucaoPaciente}
+                                onChangeText={(text) => setFormData({...formData, psaEvolucaoPaciente: text})}
+                                placeholder="Evolução do paciente baseada no PSA (antígeno prostático específico)"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Status do Exame:</Text>
+                            <View style={styles.statusButtons}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.psaStatus === 'bom' && styles.statusButtonBom
+                                    ]}
+                                    onPress={() => setFormData({...formData, psaStatus: 'bom'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.psaStatus === 'bom' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Bom (+1)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.psaStatus === 'atencao' && styles.statusButtonAtencao
+                                    ]}
+                                    onPress={() => setFormData({...formData, psaStatus: 'atencao'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.psaStatus === 'atencao' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Atenção (0)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.psaStatus === 'ruim' && styles.statusButtonRuim
+                                    ]}
+                                    onPress={() => setFormData({...formData, psaStatus: 'ruim'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.psaStatus === 'ruim' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Ruim (-1)
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        
+                        {/* Separador */}
+                        <View style={styles.separator} />
+                        
+                        {/* Papanicolau */}
+                        <View style={styles.sectionTitle}>
+                            <Text style={styles.sectionTitleText}>Papanicolau</Text>
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Data de Realização:</Text>
+                            <TextInput
+                                style={styles.textInput}
+                                value={formData.papanicolauDataRealizacao}
+                                onChangeText={(text) => setFormData({...formData, papanicolauDataRealizacao: text})}
+                                placeholder="DD/MM/AAAA"
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Resultados Obtidos:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.papanicolauResultadosObtidos}
+                                onChangeText={(text) => setFormData({...formData, papanicolauResultadosObtidos: text})}
+                                placeholder="Resultados obtidos do papanicolau"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Observações Clínicas:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.papanicolauObservacoesClinicas}
+                                onChangeText={(text) => setFormData({...formData, papanicolauObservacoesClinicas: text})}
+                                placeholder="Observações clínicas sobre o papanicolau"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Evolução do Paciente:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.papanicolauEvolucaoPaciente}
+                                onChangeText={(text) => setFormData({...formData, papanicolauEvolucaoPaciente: text})}
+                                placeholder="Evolução do paciente baseada no papanicolau"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Status do Exame:</Text>
+                            <View style={styles.statusButtons}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.papanicolauStatus === 'bom' && styles.statusButtonBom
+                                    ]}
+                                    onPress={() => setFormData({...formData, papanicolauStatus: 'bom'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.papanicolauStatus === 'bom' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Bom (+1)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.papanicolauStatus === 'atencao' && styles.statusButtonAtencao
+                                    ]}
+                                    onPress={() => setFormData({...formData, papanicolauStatus: 'atencao'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.papanicolauStatus === 'atencao' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Atenção (0)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.papanicolauStatus === 'ruim' && styles.statusButtonRuim
+                                    ]}
+                                    onPress={() => setFormData({...formData, papanicolauStatus: 'ruim'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.papanicolauStatus === 'ruim' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Ruim (-1)
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        
+                        {/* Separador */}
+                        <View style={styles.separator} />
+                        
+                        {/* Colposcopia */}
+                        <View style={styles.sectionTitle}>
+                            <Text style={styles.sectionTitleText}>Colposcopia</Text>
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Data de Realização:</Text>
+                            <TextInput
+                                style={styles.textInput}
+                                value={formData.colposcopiaDataRealizacao}
+                                onChangeText={(text) => setFormData({...formData, colposcopiaDataRealizacao: text})}
+                                placeholder="DD/MM/AAAA"
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Resultados Obtidos:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.colposcopiaResultadosObtidos}
+                                onChangeText={(text) => setFormData({...formData, colposcopiaResultadosObtidos: text})}
+                                placeholder="Resultados obtidos da colposcopia"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Observações Clínicas:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.colposcopiaObservacoesClinicas}
+                                onChangeText={(text) => setFormData({...formData, colposcopiaObservacoesClinicas: text})}
+                                placeholder="Observações clínicas sobre a colposcopia"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Evolução do Paciente:</Text>
+                            <TextInput
+                                style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
+                                value={formData.colposcopiaEvolucaoPaciente}
+                                onChangeText={(text) => setFormData({...formData, colposcopiaEvolucaoPaciente: text})}
+                                placeholder="Evolução do paciente baseada na colposcopia"
+                                multiline
+                            />
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Status do Exame:</Text>
+                            <View style={styles.statusButtons}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.colposcopiaStatus === 'bom' && styles.statusButtonBom
+                                    ]}
+                                    onPress={() => setFormData({...formData, colposcopiaStatus: 'bom'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.colposcopiaStatus === 'bom' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Bom (+1)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.colposcopiaStatus === 'atencao' && styles.statusButtonAtencao
+                                    ]}
+                                    onPress={() => setFormData({...formData, colposcopiaStatus: 'atencao'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.colposcopiaStatus === 'atencao' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Atenção (0)
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusButton,
+                                        formData.colposcopiaStatus === 'ruim' && styles.statusButtonRuim
+                                    ]}
+                                    onPress={() => setFormData({...formData, colposcopiaStatus: 'ruim'})}
+                                >
+                                    <Text style={[
+                                        styles.statusButtonText,
+                                        formData.colposcopiaStatus === 'ruim' && styles.statusButtonTextSelected
+                                    ]}>
+                                        Ruim (-1)
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        
+                        {/* Separador */}
+                        <View style={styles.separator} />
+                        
+                        {/* Outros Exames Urológicos e Ginecológicos */}
+                        <View style={styles.sectionTitle}>
+                            <Text style={styles.sectionTitleText}>Outros Exames Urológicos e Ginecológicos</Text>
+                        </View>
+                        
+                        <View style={styles.formRow}>
+                            <Text style={styles.formLabel}>Outros Exames Urológicos e Ginecológicos:</Text>
                             <TextInput
                                 style={[styles.textInput, { height: 80, textAlignVertical: 'top' }]}
                                 value={formData.outrosUrologicos}
                                 onChangeText={(text) => setFormData({...formData, outrosUrologicos: text})}
-                                placeholder="Outros exames urológicos/ginecológicos realizados"
+                                placeholder="Outros exames urológicos e ginecológicos realizados"
                                 multiline
                             />
                         </View>
