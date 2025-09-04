@@ -367,8 +367,163 @@ const ExamesComplementares = ({ navigation, route }) => {
         observacoes: '',
         dataSolicitacao: '',
         dataResultado: '',
+        
+        // Evolução do Paciente
+        observacoesEvolucao: '',
         medicoSolicitante: ''
     });
+
+    // Funções para calcular evolução do paciente
+    const getStatusValue = (status) => {
+        switch(status) {
+            case 'bom': return 1;
+            case 'atencao': return 0;
+            case 'ruim': return -1;
+            default: return 0;
+        }
+    };
+
+    const getStatusCount = (statusValue) => {
+        // Lista completa de todos os campos de status dos exames
+        const allStatusFields = [
+            // Exames Laboratoriais
+            'hemogramaStatus', 'glicemiaStatus', 'colesterolStatus', 'triglicerideosStatus',
+            'ureiaCreatininaStatus', 'transaminasesStatus', 'pcrStatus', 'vhsStatus',
+            'eletrolitosStatus', 'examesHormonaisStatus', 'urinaTipoIStatus', 'uroculturaStatus',
+            
+            // Exames de Imagem
+            'radiografiaStatus', 'ultrassonografiaStatus', 'tomografiaStatus', 'ressonanciaStatus',
+            'densitometriaOsseaStatus', 'mamografiaStatus', 'ecocardiogramaStatus', 'dopplerVascularStatus',
+            
+            // Exames Cardiológicos
+            'ecgStatus', 'testeErgometricoStatus', 'holterStatus', 'mapaStatus', 'ecocardiogramaDopplerStatus',
+            
+            // Exames Respiratórios
+            'espirometriaStatus', 'gasometriaStatus', 'oximetriaStatus', 'radiografiaToraxStatus', 'testeCaminhadaStatus',
+            
+            // Exames Neurológicos
+            'eegStatus', 'enmgStatus', 'ressonanciaCerebralStatus', 'tomografiaCerebralStatus', 'potenciaisEvocadosStatus',
+            
+            // Exames Ortopédicos e Funcionais
+            'radiografiasEspecificasStatus', 'ressonanciaArticularStatus', 'ultrassonografiaMusculoesqueleticaStatus',
+            'densitometriaOsseaStatus', 'avaliacaoPosturalStatus', 'baropodometriaStatus',
+            
+            // Exames Urológicos e Ginecológicos
+            'exameUrinaStatus', 'ultrassonografiaPelvicaStatus', 'psaStatus', 'papanicolauStatus', 'colposcopiaStatus'
+        ];
+        
+        return allStatusFields.filter(field => getStatusValue(formData[field]) === statusValue).length;
+    };
+
+    const getPontuacaoTotal = () => {
+        // Lista completa de todos os campos de status dos exames
+        const allStatusFields = [
+            // Exames Laboratoriais
+            'hemogramaStatus', 'glicemiaStatus', 'colesterolStatus', 'triglicerideosStatus',
+            'ureiaCreatininaStatus', 'transaminasesStatus', 'pcrStatus', 'vhsStatus',
+            'eletrolitosStatus', 'examesHormonaisStatus', 'urinaTipoIStatus', 'uroculturaStatus',
+            
+            // Exames de Imagem
+            'radiografiaStatus', 'ultrassonografiaStatus', 'tomografiaStatus', 'ressonanciaStatus',
+            'densitometriaOsseaStatus', 'mamografiaStatus', 'ecocardiogramaStatus', 'dopplerVascularStatus',
+            
+            // Exames Cardiológicos
+            'ecgStatus', 'testeErgometricoStatus', 'holterStatus', 'mapaStatus', 'ecocardiogramaDopplerStatus',
+            
+            // Exames Respiratórios
+            'espirometriaStatus', 'gasometriaStatus', 'oximetriaStatus', 'radiografiaToraxStatus', 'testeCaminhadaStatus',
+            
+            // Exames Neurológicos
+            'eegStatus', 'enmgStatus', 'ressonanciaCerebralStatus', 'tomografiaCerebralStatus', 'potenciaisEvocadosStatus',
+            
+            // Exames Ortopédicos e Funcionais
+            'radiografiasEspecificasStatus', 'ressonanciaArticularStatus', 'ultrassonografiaMusculoesqueleticaStatus',
+            'densitometriaOsseaStatus', 'avaliacaoPosturalStatus', 'baropodometriaStatus',
+            
+            // Exames Urológicos e Ginecológicos
+            'exameUrinaStatus', 'ultrassonografiaPelvicaStatus', 'psaStatus', 'papanicolauStatus', 'colposcopiaStatus'
+        ];
+        
+        // Calcula a pontuação total somando todos os status
+        return allStatusFields.reduce((total, field) => {
+            const value = getStatusValue(formData[field]);
+            return total + value;
+        }, 0);
+    };
+
+    const getClassificacaoEvolucao = (pontuacao) => {
+        if (pontuacao >= 20) return '🟢 Excelente';
+        if (pontuacao >= 10) return '🟡 Bom';
+        if (pontuacao >= 0) return '🟠 Regular';
+        if (pontuacao >= -10) return '🔴 Ruim';
+        return '⚫ Crítico';
+    };
+
+    const getPosicaoIndicador = () => {
+        const pontuacao = getPontuacaoTotal();
+        // Pontuação vai de -40 a +40, mapeia para 0-100%
+        // -40 (crítico) = 0% (esquerda), +40 (excelente) = 100% (direita)
+        const posicao = ((pontuacao + 40) / 80) * 100;
+        return Math.max(0, Math.min(100, posicao));
+    };
+
+    const getEvolucaoPorSecao = () => {
+        return [
+            { 
+                nome: 'Exames Laboratoriais', 
+                pontuacao: getStatusValue(formData.hemogramaStatus) + getStatusValue(formData.glicemiaStatus) + 
+                          getStatusValue(formData.colesterolStatus) + getStatusValue(formData.triglicerideosStatus) +
+                          getStatusValue(formData.ureiaCreatininaStatus) + getStatusValue(formData.transaminasesStatus) +
+                          getStatusValue(formData.pcrStatus) + getStatusValue(formData.vhsStatus) +
+                          getStatusValue(formData.eletrolitosStatus) + getStatusValue(formData.examesHormonaisStatus) +
+                          getStatusValue(formData.urinaTipoIStatus) + getStatusValue(formData.uroculturaStatus)
+            },
+            { 
+                nome: 'Exames de Imagem', 
+                pontuacao: getStatusValue(formData.radiografiaStatus) + getStatusValue(formData.ultrassonografiaStatus) + 
+                          getStatusValue(formData.tomografiaStatus) + getStatusValue(formData.ressonanciaStatus) +
+                          getStatusValue(formData.densitometriaOsseaStatus) + getStatusValue(formData.mamografiaStatus) +
+                          getStatusValue(formData.ecocardiogramaStatus) + getStatusValue(formData.dopplerVascularStatus)
+            },
+            { 
+                nome: 'Exames Cardiológicos', 
+                pontuacao: getStatusValue(formData.ecgStatus) + getStatusValue(formData.testeErgometricoStatus) + 
+                          getStatusValue(formData.holterStatus) + getStatusValue(formData.mapaStatus) +
+                          getStatusValue(formData.ecocardiogramaDopplerStatus)
+            },
+            { 
+                nome: 'Exames Respiratórios', 
+                pontuacao: getStatusValue(formData.espirometriaStatus) + getStatusValue(formData.gasometriaStatus) + 
+                          getStatusValue(formData.oximetriaStatus) + getStatusValue(formData.radiografiaToraxStatus) +
+                          getStatusValue(formData.testeCaminhadaStatus)
+            },
+            { 
+                nome: 'Exames Neurológicos', 
+                pontuacao: getStatusValue(formData.eegStatus) + getStatusValue(formData.enmgStatus) + 
+                          getStatusValue(formData.ressonanciaCerebralStatus) + getStatusValue(formData.tomografiaCerebralStatus) +
+                          getStatusValue(formData.potenciaisEvocadosStatus)
+            },
+            { 
+                nome: 'Exames Ortopédicos', 
+                pontuacao: getStatusValue(formData.radiografiasEspecificasStatus) + getStatusValue(formData.ressonanciaArticularStatus) + 
+                          getStatusValue(formData.ultrassonografiaMusculoesqueleticaStatus) + getStatusValue(formData.densitometriaOsseaStatus) +
+                          getStatusValue(formData.avaliacaoPosturalStatus) + getStatusValue(formData.baropodometriaStatus)
+            },
+            { 
+                nome: 'Exames Urológicos', 
+                pontuacao: getStatusValue(formData.exameUrinaStatus) + getStatusValue(formData.ultrassonografiaPelvicaStatus) + 
+                          getStatusValue(formData.psaStatus) + getStatusValue(formData.papanicolauStatus) +
+                          getStatusValue(formData.colposcopiaStatus)
+            }
+        ];
+    };
+
+    const getCorSecao = (pontuacao) => {
+        if (pontuacao >= 2) return '#28a745'; // Verde
+        if (pontuacao >= 0) return '#ffc107'; // Amarelo
+        if (pontuacao >= -2) return '#fd7e14'; // Laranja
+        return '#dc3545'; // Vermelho
+    };
 
     // Função para alternar o estado de expansão de uma seção
     const toggleSection = (sectionKey) => {
@@ -423,8 +578,14 @@ const ExamesComplementares = ({ navigation, route }) => {
             content: 'Ultrassom, urofluxometria, papanicolau...'
         },
         {
+            key: 'evolucaoPaciente',
+            title: '8. EVOLUÇÃO DO PACIENTE',
+            icon: '📈',
+            content: 'Somatório dos exames e evolução geral do paciente...'
+        },
+        {
             key: 'gerais',
-            title: '8. INFORMAÇÕES GERAIS',
+            title: '9. INFORMAÇÕES GERAIS',
             icon: '📋',
             content: 'Datas, médico solicitante, observações...'
         }
@@ -5261,6 +5422,99 @@ const ExamesComplementares = ({ navigation, route }) => {
                     </View>
                 );
                 
+            case 'evolucaoPaciente':
+                return (
+                    <View style={styles.formContent}>
+                        <Text style={styles.sectionSubtitle}>📊 EVOLUÇÃO DO PACIENTE</Text>
+                        <Text style={styles.formDescription}>
+                            Esta seção mostra o somatório dos status dos exames e a evolução geral do paciente
+                        </Text>
+
+                        {/* Resumo dos Status */}
+                        <View style={styles.evolucaoContainer}>
+                            <View style={styles.statusResumoContainer}>
+                                <View style={styles.statusResumoItem}>
+                                    <Text style={styles.statusResumoLabel}>🟢 Bom (+1):</Text>
+                                    <Text style={styles.statusResumoValor}>{getStatusCount(1)}</Text>
+                                </View>
+                                <View style={styles.statusResumoItem}>
+                                    <Text style={styles.statusResumoLabel}>🟡 Atenção (0):</Text>
+                                    <Text style={styles.statusResumoValor}>{getStatusCount(0)}</Text>
+                                </View>
+                                <View style={styles.statusResumoItem}>
+                                    <Text style={styles.statusResumoLabel}>🔴 Ruim (-1):</Text>
+                                    <Text style={styles.statusResumoValor}>{getStatusCount(-1)}</Text>
+                                </View>
+                            </View>
+
+                            {/* Pontuação Total */}
+                            <View style={styles.pontuacaoContainer}>
+                                <Text style={styles.pontuacaoTitle}>Pontuação Total:</Text>
+                                <Text style={styles.pontuacaoValor}>{getPontuacaoTotal()}</Text>
+                                <Text style={styles.pontuacaoClassificacao}>
+                                    {getClassificacaoEvolucao(getPontuacaoTotal())}
+                                </Text>
+                            </View>
+                        </View>
+
+                        {/* Linha de Evolução Visual */}
+                        <View style={styles.evolucaoVisualContainer}>
+                            <Text style={styles.evolucaoVisualTitle}>Linha de Evolução:</Text>
+                            
+                            <View style={styles.evolucaoBarraContainer}>
+                                <View style={styles.evolucaoBarra}>
+                                    <View 
+                                        style={[
+                                            styles.evolucaoIndicador,
+                                            { left: `${getPosicaoIndicador()}%` }
+                                        ]} 
+                                    />
+                                </View>
+                                <View style={styles.evolucaoLabels}>
+                                    <Text style={styles.evolucaoLabel}>Crítico</Text>
+                                    <Text style={styles.evolucaoLabel}>Ruim</Text>
+                                    <Text style={styles.evolucaoLabel}>Regular</Text>
+                                    <Text style={styles.evolucaoLabel}>Bom</Text>
+                                    <Text style={styles.evolucaoLabel}>Excelente</Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        {/* Gráfico de Evolução por Seção */}
+                        <View style={styles.graficoEvolucaoContainer}>
+                            <Text style={styles.graficoEvolucaoTitle}>Evolução por Seção:</Text>
+                            
+                            {getEvolucaoPorSecao().map((secao, index) => (
+                                <View key={index} style={styles.graficoSecaoItem}>
+                                    <Text style={styles.graficoSecaoNome}>{secao.nome}</Text>
+                                    <View style={styles.graficoSecaoBarra}>
+                                        <View 
+                                            style={[
+                                                styles.graficoSecaoIndicador,
+                                                { 
+                                                    width: `${Math.max(0, (secao.pontuacao + 3) * 16.67)}%`,
+                                                    backgroundColor: getCorSecao(secao.pontuacao)
+                                                }
+                                            ]} 
+                                        />
+                                    </View>
+                                    <Text style={styles.graficoSecaoPontuacao}>{secao.pontuacao}</Text>
+                                </View>
+                            ))}
+                        </View>
+
+                        {/* Observações da Evolução */}
+                        <Text style={styles.formLabel}>Observações da Evolução:</Text>
+                        <TextInput
+                            style={[styles.textInput, { height: 80, textAlignVertical: 'top' }]}
+                            value={formData.observacoesEvolucao}
+                            onChangeText={(text) => setFormData({...formData, observacoesEvolucao: text})}
+                            placeholder="Descreva observações sobre a evolução do paciente baseada nos exames complementares"
+                            multiline
+                        />
+                    </View>
+                );
+                
             case 'gerais':
                 return (
                     <View style={styles.formContent}>
@@ -5594,6 +5848,161 @@ const styles = StyleSheet.create({
         height: 1,
         backgroundColor: '#e9ecef',
         marginVertical: 20,
+    },
+    // Estilos para a seção de evolução do paciente
+    evolucaoContainer: {
+        backgroundColor: '#f8f9fa',
+        borderRadius: 12,
+        padding: 20,
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
+    },
+    statusResumoContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        marginBottom: 20,
+    },
+    statusResumoItem: {
+        alignItems: 'center',
+        flex: 1,
+    },
+    statusResumoLabel: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#6c757d',
+        marginBottom: 5,
+    },
+    statusResumoValor: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#343a40',
+    },
+    pontuacaoContainer: {
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        padding: 15,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#dee2e6',
+    },
+    pontuacaoTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#6c757d',
+        marginBottom: 8,
+    },
+    pontuacaoValor: {
+        fontSize: 32,
+        fontWeight: 'bold',
+        color: '#007bff',
+        marginBottom: 5,
+    },
+    pontuacaoClassificacao: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#343a40',
+    },
+    evolucaoVisualContainer: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 20,
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
+    },
+    evolucaoVisualTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#343a40',
+        marginBottom: 15,
+        textAlign: 'center',
+    },
+    evolucaoBarraContainer: {
+        alignItems: 'center',
+    },
+    evolucaoBarra: {
+        width: '100%',
+        height: 20,
+        backgroundColor: '#e9ecef',
+        borderRadius: 10,
+        marginBottom: 15,
+        position: 'relative',
+    },
+    evolucaoIndicador: {
+        position: 'absolute',
+        top: 2,
+        width: 16,
+        height: 16,
+        backgroundColor: '#007bff',
+        borderRadius: 8,
+        borderWidth: 2,
+        borderColor: '#fff',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    evolucaoLabels: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+    },
+    evolucaoLabel: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: '#6c757d',
+        textAlign: 'center',
+        flex: 1,
+    },
+    graficoEvolucaoContainer: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 20,
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
+    },
+    graficoEvolucaoTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#343a40',
+        marginBottom: 15,
+        textAlign: 'center',
+    },
+    graficoSecaoItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+        paddingVertical: 8,
+    },
+    graficoSecaoNome: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#343a40',
+        width: '40%',
+        marginRight: 10,
+    },
+    graficoSecaoBarra: {
+        flex: 1,
+        height: 12,
+        backgroundColor: '#e9ecef',
+        borderRadius: 6,
+        marginRight: 10,
+        overflow: 'hidden',
+    },
+    graficoSecaoIndicador: {
+        height: '100%',
+        borderRadius: 6,
+        minWidth: 4,
+    },
+    graficoSecaoPontuacao: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#343a40',
+        width: '15%',
+        textAlign: 'center',
     },
 });
 
