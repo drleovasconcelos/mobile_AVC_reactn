@@ -498,7 +498,7 @@ const ExameFisico = ({ navigation, route }) => {
         { key: 'impressaoGeral', title: '2. IMPRESSÃO GERAL', icon: '👁️' },
         { key: 'avaliacaoDor', title: '3. AVALIAÇÃO DA DOR', icon: '😣' },
         { key: 'sinaisVitais', title: '4. SINAIS VITAIS E OUTROS', icon: '💓' },
-        { key: 'examesFisioterapeuticos', title: '4-5. EXAMES FISIOTERAPÊUTICOS', icon: '🔬' },
+        { key: 'examesFisioterapeuticos', title: '5. EXAMES FISIOTERAPÊUTICOS', icon: '🔬' },
         { key: 'avaliacaoRespiratoria', title: '6. AVALIAÇÃO RESPIRATÓRIA', icon: '🫁' },
         { key: 'avaliacaoSistemas', title: '7. AVALIAÇÃO DOS SISTEMAS', icon: '⚕️' },
         { key: 'condutaFisioterapeutica', title: '8. CONDUTA FISIOTERAPÊUTICA', icon: '🎯' },
