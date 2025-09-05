@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -20,9 +20,13 @@ import {
     salvarAvaliacao, 
     validarDadosAvaliacao 
 } from '../services/AvaliacaoStorage';
+import { useExameFisico } from '../context/ExameFisicoContext';
 
 const ExameFisico = ({ navigation, route }) => {
     const { paciente } = route.params;
+    
+    // Hook para acessar o Context do Exame Físico
+    const { salvarExameFisico, getExameFisicoData } = useExameFisico();
     
     // Estado para controlar quais seções estão expandidas
     const [expandedSections, setExpandedSections] = useState({});
@@ -255,6 +259,14 @@ const ExameFisico = ({ navigation, route }) => {
         statusConduta: 0,
         observacoesEvolucao: ''
     });
+
+    // useEffect para carregar dados salvos quando o componente montar
+    useEffect(() => {
+        const dadosSalvos = getExameFisicoData(paciente.prontuario);
+        if (dadosSalvos && Object.keys(dadosSalvos).length > 0) {
+            setFormData(prev => ({ ...prev, ...dadosSalvos }));
+        }
+    }, [paciente.prontuario]);
 
     // Função para calcular IMC
     const calcularIMC = (peso, altura) => {
@@ -549,6 +561,12 @@ const ExameFisico = ({ navigation, route }) => {
         setModalSalvarVisible(true);
     };
 
+    // useEffect para salvar automaticamente os dados quando houver mudanças
+    useEffect(() => {
+        if (formData && Object.keys(formData).length > 0) {
+            salvarExameFisico(paciente.prontuario, formData);
+        }
+    }, [formData, paciente.prontuario]);
 
     // Função para alternar o estado de expansão de uma seção
     const toggleSection = (sectionKey) => {

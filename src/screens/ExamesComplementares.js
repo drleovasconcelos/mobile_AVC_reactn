@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -14,12 +14,16 @@ import {
 import Footer from '../components/Footer';
 import { useAvaliacaoConsolidada } from '../context/AvaliacaoConsolidadaContext';
 import { useAnamnese } from '../context/AnamneseContext';
+import { useExameFisico } from '../context/ExameFisicoContext';
+import { useExamesComplementares } from '../context/ExamesComplementaresContext';
 
 const ExamesComplementares = ({ navigation, route }) => {
     const { paciente } = route.params;
     
     // Hooks para acessar dados das outras telas
-    const { anamneseData } = useAnamnese();
+    const { getAnamneseData } = useAnamnese();
+    const { getExameFisicoData } = useExameFisico();
+    const { salvarExamesComplementares, getExamesComplementaresData } = useExamesComplementares();
     const { 
         consolidarDadosAvaliacao, 
         formatarDadosAnamnese,
@@ -386,6 +390,14 @@ const ExamesComplementares = ({ navigation, route }) => {
         medicoSolicitante: ''
     });
 
+    // useEffect para carregar dados salvos quando o componente montar
+    useEffect(() => {
+        const dadosSalvos = getExamesComplementaresData(paciente.prontuario);
+        if (dadosSalvos && Object.keys(dadosSalvos).length > 0) {
+            setFormData(prev => ({ ...prev, ...dadosSalvos }));
+        }
+    }, [paciente.prontuario]);
+
     // Funções para calcular evolução do paciente
     const getStatusValue = (status) => {
         switch(status) {
@@ -538,6 +550,13 @@ const ExamesComplementares = ({ navigation, route }) => {
         return '#dc3545'; // Vermelho
     };
 
+    // useEffect para salvar automaticamente os dados quando houver mudanças
+    useEffect(() => {
+        if (formData && Object.keys(formData).length > 0) {
+            salvarExamesComplementares(paciente.prontuario, formData);
+        }
+    }, [formData, paciente.prontuario]);
+
     // Função para alternar o estado de expansão de uma seção
     const toggleSection = (sectionKey) => {
         setExpandedSections(prev => ({
@@ -559,11 +578,14 @@ const ExamesComplementares = ({ navigation, route }) => {
                         try {
                             console.log('🚀 Iniciando salvamento da avaliação completa...');
                             console.log('📊 Dados do formData (Exames Complementares):', formData);
+                            
+                            // Obter dados da anamnese para o paciente específico
+                            const anamneseData = getAnamneseData(paciente.prontuario);
                             console.log('📋 Dados da Anamnese:', anamneseData);
 
                             // Formatar dados de todas as telas
                             const dadosAnamnese = formatarDadosAnamnese(anamneseData || {});
-                            const dadosExameFisico = formatarDadosExameFisico({}); // Dados do exame físico (simulados por enquanto)
+                            const dadosExameFisico = formatarDadosExameFisico(getExameFisicoData(paciente.prontuario));
                             const dadosExamesComplementares = formatarDadosExamesComplementares(formData);
 
                             console.log('📝 Dados formatados da Anamnese:', dadosAnamnese);

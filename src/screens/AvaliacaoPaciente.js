@@ -42,6 +42,10 @@ const AvaliacaoPaciente = ({ navigation, route }) => {
         navigation.navigate('Dashboard', { paciente });
     };
 
+    const handleEscalasHospitalares = () => {
+        navigation.navigate('EscalasHospitalares', { paciente });
+    };
+
     // Funções para o sistema de persistência
     const handleSalvarAvaliacao = async (nomeAvaliacao) => {
         try {
@@ -49,15 +53,11 @@ const AvaliacaoPaciente = ({ navigation, route }) => {
             
             // Criar dados da avaliação (simulados para demonstração)
             const dadosAvaliacao = createAvaliacaoData({
-                paciente: paciente,
-                nomeAvaliacao: nomeAvaliacao,
-                dadosAvaliacao: {
-                    // Dados simulados - em uma implementação real, estes dados viriam dos Contexts
-                    anamnese: {},
-                    exameFisico: {},
-                    examesComplementares: {}
-                }
-            });
+                // Dados simulados - em uma implementação real, estes dados viriam dos Contexts
+                anamnese: {},
+                exameFisico: {},
+                examesComplementares: {}
+            }, nomeAvaliacao, 0, 'Regular', paciente);
 
             // Validar dados
             if (!validarDadosAvaliacao(dadosAvaliacao)) {
@@ -111,7 +111,7 @@ const AvaliacaoPaciente = ({ navigation, route }) => {
                 <View style={styles.headerActions}>
                     <TouchableOpacity
                         style={[styles.actionButton, styles.buscarButton]}
-                        onPress={() => setModalListaVisible(true)}
+                        onPress={() => navigation.navigate('BuscarAvaliacao', { paciente })}
                     >
                         <Text style={styles.buscarButtonText}>🔍 Buscar</Text>
                     </TouchableOpacity>
@@ -164,6 +164,13 @@ const AvaliacaoPaciente = ({ navigation, route }) => {
                         </Text>
                     </TouchableOpacity>
 
+                    <TouchableOpacity style={styles.menuButton} onPress={handleEscalasHospitalares}>
+                        <Text style={styles.menuIcon}>📏</Text>
+                        <Text style={styles.menuTitle}>Escalas Hospitalares</Text>
+                        <Text style={styles.menuDescription}>
+                            Escalas de avaliação e monitoramento hospitalar
+                        </Text>
+                    </TouchableOpacity>
 
                     <TouchableOpacity style={styles.menuButton} onPress={handleDashboard}>
                         <Text style={styles.menuIcon}>📊</Text>

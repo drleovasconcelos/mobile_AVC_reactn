@@ -3,15 +3,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const STORAGE_KEY = 'avaliacoes_fisioterapeuticas';
 
 // Estrutura de dados para uma avaliação
-export const createAvaliacaoData = (formData, nomeAvaliacao, pontuacaoTotal, statusGeral) => {
+export const createAvaliacaoData = (formData, nomeAvaliacao, pontuacaoTotal, statusGeral, paciente) => {
     return {
         id: `avaliacao_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         nomeAvaliacao: nomeAvaliacao || `Avaliação - ${new Date().toLocaleDateString('pt-BR')}`,
         dataCriacao: new Date().toISOString(),
-        dadosAvaliacao: { ...formData },
+        dadosAvaliacao: { 
+            ...formData,
+            paciente: paciente // Incluir dados do paciente na avaliação
+        },
         pontuacaoTotal: pontuacaoTotal || 0,
         statusGeral: statusGeral || 'Regular',
-        tipoAvaliacao: 'exames_complementares'
+        tipoAvaliacao: 'avaliacao_completa'
     };
 };
 
@@ -112,16 +115,31 @@ export const limparTodasAvaliacoes = async () => {
 };
 
 // Validar dados da avaliação
-export const validarDadosAvaliacao = (formData) => {
+export const validarDadosAvaliacao = (avaliacaoData) => {
     const erros = [];
     
-    // Verificar se pelo menos um campo foi preenchido
-    const camposPreenchidos = Object.values(formData).filter(valor => 
-        valor && valor.toString().trim() !== ''
-    );
+    // Verificar se a estrutura básica está presente
+    if (!avaliacaoData.id) {
+        erros.push('ID da avaliação é obrigatório.');
+    }
     
-    if (camposPreenchidos.length === 0) {
-        erros.push('Pelo menos um campo deve ser preenchido para salvar a avaliação.');
+    if (!avaliacaoData.nomeAvaliacao) {
+        erros.push('Nome da avaliação é obrigatório.');
+    }
+    
+    if (!avaliacaoData.dataCriacao) {
+        erros.push('Data de criação é obrigatória.');
+    }
+    
+    // Verificar se pelo menos um campo foi preenchido nos dados da avaliação
+    if (avaliacaoData.dadosAvaliacao) {
+        const camposPreenchidos = Object.values(avaliacaoData.dadosAvaliacao).filter(valor => 
+            valor && valor.toString().trim() !== ''
+        );
+        
+        if (camposPreenchidos.length === 0) {
+            erros.push('Pelo menos um campo deve ser preenchido para salvar a avaliação.');
+        }
     }
     
     return {

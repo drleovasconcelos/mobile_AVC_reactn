@@ -10,11 +10,14 @@ import Anamnese from './src/screens/Anamnese';
 import Dashboard from './src/screens/Dashboard';
 import ExameFisico from './src/screens/ExameFisico';
 import ExamesComplementares from './src/screens/ExamesComplementares';
+import EscalasHospitalares from './src/screens/EscalasHospitalares';
 import BuscarAvaliacao from './src/screens/BuscarAvaliacao';
 import { PacientesProvider } from './src/context/PacientesContext';
 import { AnamneseProvider } from './src/context/AnamneseContext';
 import { AuthProvider } from './src/context/AuthContext';
 import { AvaliacaoConsolidadaProvider } from './src/context/AvaliacaoConsolidadaContext';
+import { ExameFisicoProvider } from './src/context/ExameFisicoContext';
+import { ExamesComplementaresProvider } from './src/context/ExamesComplementaresContext';
 import { StyleSheet, Text, View } from 'react-native';
 
 const Stack = createStackNavigator();
@@ -24,7 +27,9 @@ export default function App() {
     <AuthProvider>
       <PacientesProvider>
         <AnamneseProvider>
-          <AvaliacaoConsolidadaProvider>
+          <ExameFisicoProvider>
+            <ExamesComplementaresProvider>
+              <AvaliacaoConsolidadaProvider>
             <NavigationContainer>
           <Stack.Navigator 
             initialRouteName="Login"
@@ -108,6 +113,14 @@ export default function App() {
                              }}
                          />
                          <Stack.Screen
+                             name="EscalasHospitalares"
+                             component={EscalasHospitalares}
+                             options={{
+                                 title: 'Escalas Hospitalares',
+                                 headerBackTitle: 'Voltar'
+                             }}
+                         />
+                         <Stack.Screen
                              name="BuscarAvaliacao"
                              component={BuscarAvaliacao}
                              options={{
@@ -117,7 +130,9 @@ export default function App() {
                          />
                     </Stack.Navigator>
             </NavigationContainer>
-          </AvaliacaoConsolidadaProvider>
+              </AvaliacaoConsolidadaProvider>
+            </ExamesComplementaresProvider>
+          </ExameFisicoProvider>
         </AnamneseProvider>
       </PacientesProvider>
     </AuthProvider>
