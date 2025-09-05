@@ -4,14 +4,27 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    Alert,
     SafeAreaView,
-    ScrollView
+    ScrollView,
+    Alert,
+    ActivityIndicator
 } from 'react-native';
 import Footer from '../components/Footer';
+import ModalSalvarAvaliacao from '../components/ModalSalvarAvaliacao';
+import ListaAvaliacoes from '../components/ListaAvaliacoes';
+import { 
+    createAvaliacaoData, 
+    salvarAvaliacao, 
+    validarDadosAvaliacao 
+} from '../services/AvaliacaoStorage';
 
 const AvaliacaoPaciente = ({ navigation, route }) => {
     const { paciente } = route.params;
+    
+    // Estados para o sistema de persistência
+    const [modalSalvarVisible, setModalSalvarVisible] = useState(false);
+    const [modalListaVisible, setModalListaVisible] = useState(false);
+    const [salvando, setSalvando] = useState(false);
 
     const handleAnamnese = () => {
         navigation.navigate('Anamnese', { paciente });
@@ -29,6 +42,62 @@ const AvaliacaoPaciente = ({ navigation, route }) => {
         navigation.navigate('Dashboard', { paciente });
     };
 
+    // Funções para o sistema de persistência
+    const handleSalvarAvaliacao = async (nomeAvaliacao) => {
+        try {
+            setSalvando(true);
+            
+            // Criar dados da avaliação (simulados para demonstração)
+            const dadosAvaliacao = createAvaliacaoData({
+                paciente: paciente,
+                nomeAvaliacao: nomeAvaliacao,
+                dadosAvaliacao: {
+                    // Dados simulados - em uma implementação real, estes dados viriam dos Contexts
+                    anamnese: {},
+                    exameFisico: {},
+                    examesComplementares: {}
+                }
+            });
+
+            // Validar dados
+            if (!validarDadosAvaliacao(dadosAvaliacao)) {
+                Alert.alert('Erro', 'Dados da avaliação inválidos');
+                return;
+            }
+
+            // Salvar avaliação
+            await salvarAvaliacao(dadosAvaliacao);
+            
+            setModalSalvarVisible(false);
+            Alert.alert('Sucesso!', 'Avaliação salva com sucesso!');
+            
+        } catch (error) {
+            console.error('Erro ao salvar avaliação:', error);
+            Alert.alert('Erro', 'Erro ao salvar a avaliação. Tente novamente.');
+        } finally {
+            setSalvando(false);
+        }
+    };
+
+    const handleCarregarAvaliacao = (avaliacao) => {
+        setModalListaVisible(false);
+        Alert.alert(
+            'Avaliação Carregada',
+            `Avaliação "${avaliacao.nomeAvaliacao}" carregada com sucesso!`,
+            [
+                { text: 'OK', onPress: () => {
+                    // Aqui você pode implementar a lógica para carregar os dados da avaliação
+                    console.log('Avaliação carregada:', avaliacao);
+                }}
+            ]
+        );
+    };
+
+    const handleAbrirModalSalvar = () => {
+        setModalSalvarVisible(true);
+    };
+
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
@@ -36,6 +105,28 @@ const AvaliacaoPaciente = ({ navigation, route }) => {
                 <View style={styles.pacienteInfo}>
                     <Text style={styles.pacienteNome}>{paciente.nome}</Text>
                     <Text style={styles.pacienteProntuario}>Prontuário: {paciente.prontuario}</Text>
+                </View>
+                
+                {/* Botões de Ação */}
+                <View style={styles.headerActions}>
+                    <TouchableOpacity
+                        style={[styles.actionButton, styles.buscarButton]}
+                        onPress={() => setModalListaVisible(true)}
+                    >
+                        <Text style={styles.buscarButtonText}>🔍 Buscar</Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity
+                        style={[styles.actionButton, styles.salvarButton]}
+                        onPress={handleAbrirModalSalvar}
+                        disabled={salvando}
+                    >
+                        {salvando ? (
+                            <ActivityIndicator color="#fff" size="small" />
+                        ) : (
+                            <Text style={styles.salvarButtonText}>💾 Salvar</Text>
+                        )}
+                    </TouchableOpacity>
                 </View>
             </View>
 
@@ -73,6 +164,7 @@ const AvaliacaoPaciente = ({ navigation, route }) => {
                         </Text>
                     </TouchableOpacity>
 
+
                     <TouchableOpacity style={styles.menuButton} onPress={handleDashboard}>
                         <Text style={styles.menuIcon}>📊</Text>
                         <Text style={styles.menuTitle}>Dashboard</Text>
@@ -82,6 +174,22 @@ const AvaliacaoPaciente = ({ navigation, route }) => {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+
+            {/* Modais para persistência */}
+            <ModalSalvarAvaliacao
+                visible={modalSalvarVisible}
+                onClose={() => setModalSalvarVisible(false)}
+                onSalvar={handleSalvarAvaliacao}
+                salvando={salvando}
+                paciente={paciente}
+            />
+            
+            <ListaAvaliacoes
+                visible={modalListaVisible}
+                onClose={() => setModalListaVisible(false)}
+                onCarregar={handleCarregarAvaliacao}
+                paciente={paciente}
+            />
 
             <Footer navigation={navigation} currentScreen="AvaliacaoPaciente" />
         </SafeAreaView>
@@ -118,6 +226,35 @@ const styles = StyleSheet.create({
         color: '#fff',
         opacity: 0.9,
         textAlign: 'center',
+    },
+    headerActions: {
+        flexDirection: 'row',
+        gap: 10,
+        marginLeft: 20,
+    },
+    actionButton: {
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: 80,
+    },
+    buscarButton: {
+        backgroundColor: '#17a2b8',
+    },
+    buscarButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#fff',
+    },
+    salvarButton: {
+        backgroundColor: '#28a745',
+    },
+    salvarButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#fff',
     },
     content: {
         flex: 1,

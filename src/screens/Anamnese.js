@@ -1131,13 +1131,15 @@ const Anamnese = ({ navigation, route }) => {
                 </ScrollView>
             </KeyboardAvoidingView>
 
-            {/* Botão para Exame Físico */}
+            {/* Botão para Exame Físico - Posicionado na tela principal */}
             <View style={styles.exameFisicoButtonContainer}>
                 <TouchableOpacity 
                     style={styles.exameFisicoButton}
                     onPress={() => navigation.navigate('ExameFisico', { paciente })}
                 >
-                    <Text style={styles.exameFisicoButtonText}>🔍 EXAME FÍSICO</Text>
+                    <Text style={styles.exameFisicoButtonText}>
+                        👨‍⚕️ Exame Físico
+                    </Text>
                 </TouchableOpacity>
             </View>
             

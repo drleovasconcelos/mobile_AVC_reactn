@@ -10,9 +10,11 @@ import Anamnese from './src/screens/Anamnese';
 import Dashboard from './src/screens/Dashboard';
 import ExameFisico from './src/screens/ExameFisico';
 import ExamesComplementares from './src/screens/ExamesComplementares';
+import BuscarAvaliacao from './src/screens/BuscarAvaliacao';
 import { PacientesProvider } from './src/context/PacientesContext';
 import { AnamneseProvider } from './src/context/AnamneseContext';
 import { AuthProvider } from './src/context/AuthContext';
+import { AvaliacaoConsolidadaProvider } from './src/context/AvaliacaoConsolidadaContext';
 import { StyleSheet, Text, View } from 'react-native';
 
 const Stack = createStackNavigator();
@@ -22,7 +24,8 @@ export default function App() {
     <AuthProvider>
       <PacientesProvider>
         <AnamneseProvider>
-          <NavigationContainer>
+          <AvaliacaoConsolidadaProvider>
+            <NavigationContainer>
           <Stack.Navigator 
             initialRouteName="Login"
             screenOptions={{
@@ -104,8 +107,17 @@ export default function App() {
                                  headerBackTitle: 'Voltar'
                              }}
                          />
+                         <Stack.Screen
+                             name="BuscarAvaliacao"
+                             component={BuscarAvaliacao}
+                             options={{
+                                 title: 'Buscar Avaliação',
+                                 headerBackTitle: 'Voltar'
+                             }}
+                         />
                     </Stack.Navigator>
-        </NavigationContainer>
+            </NavigationContainer>
+          </AvaliacaoConsolidadaProvider>
         </AnamneseProvider>
       </PacientesProvider>
     </AuthProvider>

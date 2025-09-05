@@ -9,15 +9,28 @@ import {
     TextInput,
     KeyboardAvoidingView,
     Platform,
-    Alert
+    Alert,
+    ActivityIndicator
 } from 'react-native';
 import Footer from '../components/Footer';
+import ModalSalvarAvaliacao from '../components/ModalSalvarAvaliacao';
+import ListaAvaliacoes from '../components/ListaAvaliacoes';
+import { 
+    createAvaliacaoData, 
+    salvarAvaliacao, 
+    validarDadosAvaliacao 
+} from '../services/AvaliacaoStorage';
 
 const ExameFisico = ({ navigation, route }) => {
     const { paciente } = route.params;
     
     // Estado para controlar quais seções estão expandidas
     const [expandedSections, setExpandedSections] = useState({});
+    
+    // Estados para o sistema de persistência
+    const [modalSalvarVisible, setModalSalvarVisible] = useState(false);
+    const [modalListaVisible, setModalListaVisible] = useState(false);
+    const [salvando, setSalvando] = useState(false);
     
     // Estado para os dados do exame físico
     const [formData, setFormData] = useState({
@@ -471,18 +484,71 @@ const ExameFisico = ({ navigation, route }) => {
         console.log('=== PONTUAÇÃO TOTAL:', getPontuacaoTotal(), '===');
     };
 
-    // Função para salvar os dados
-    const salvarExame = async () => {
+    // Funções para o sistema de persistência
+    const handleSalvarAvaliacao = async (nomeAvaliacao) => {
+        setSalvando(true);
+        
         try {
-            Alert.alert(
-                'Sucesso', 
-                'Exame físico salvo com sucesso!',
-                [{ text: 'OK', onPress: () => navigation.goBack() }]
+            // Validar dados antes de salvar
+            const validacao = validarDadosAvaliacao(formData);
+            if (!validacao.valido) {
+                Alert.alert('Erro', validacao.erros.join('\n'));
+                setSalvando(false);
+                return;
+            }
+
+            // Criar dados da avaliação
+            const pontuacaoTotal = getPontuacaoTotal();
+            const statusGeral = getClassificacaoEvolucao(pontuacaoTotal);
+            
+            const avaliacaoData = createAvaliacaoData(
+                formData, 
+                nomeAvaliacao, 
+                pontuacaoTotal, 
+                statusGeral
             );
+
+            // Salvar avaliação
+            const resultado = await salvarAvaliacao(avaliacaoData);
+            
+            if (resultado.success) {
+                Alert.alert('Sucesso!', resultado.message);
+                setModalSalvarVisible(false);
+            } else {
+                Alert.alert('Erro', resultado.message);
+            }
         } catch (error) {
-            Alert.alert('Erro', 'Não foi possível salvar o exame. Tente novamente.');
+            console.error('Erro ao salvar avaliação:', error);
+            Alert.alert('Erro', 'Erro inesperado ao salvar avaliação.');
+        } finally {
+            setSalvando(false);
         }
     };
+
+    const handleCarregarAvaliacao = (avaliacao) => {
+        try {
+            // Carregar dados da avaliação
+            setFormData(avaliacao.dadosAvaliacao);
+            
+            Alert.alert(
+                'Avaliação Carregada!', 
+                `A avaliação "${avaliacao.nomeAvaliacao}" foi carregada com sucesso.`
+            );
+        } catch (error) {
+            console.error('Erro ao carregar avaliação:', error);
+            Alert.alert('Erro', 'Erro ao carregar avaliação.');
+        }
+    };
+
+    const handleAbrirModalSalvar = () => {
+        const validacao = validarDadosAvaliacao(formData);
+        if (!validacao.valido) {
+            Alert.alert('Atenção', validacao.erros.join('\n'));
+            return;
+        }
+        setModalSalvarVisible(true);
+    };
+
 
     // Função para alternar o estado de expansão de uma seção
     const toggleSection = (sectionKey) => {
@@ -2018,12 +2084,6 @@ const ExameFisico = ({ navigation, route }) => {
                             ))}
                         </View>
 
-                        {/* Botão de Debug */}
-                        <TouchableOpacity 
-                            style={[styles.button, { backgroundColor: '#6c757d', marginTop: 20 }]}
-                            onPress={debugStatusFields}
-                        >
-                        </TouchableOpacity>
 
                         {/* Observações da Evolução */}
                         <Text style={styles.formLabel}>Observações da Evolução:</Text>
@@ -2034,6 +2094,7 @@ const ExameFisico = ({ navigation, route }) => {
                             placeholder="Descreva observações sobre a evolução do paciente"
                             multiline
                         />
+
                     </View>
                 );
                 
@@ -2056,9 +2117,6 @@ const ExameFisico = ({ navigation, route }) => {
                     <Text style={styles.pacienteProntuario}>Prontuário: {paciente.prontuario}</Text>
                 </View>
                 
-                <TouchableOpacity style={styles.saveButton} onPress={salvarExame}>
-                    <Text style={styles.saveButtonText}>Salvar</Text>
-                </TouchableOpacity>
             </View>
 
             <KeyboardAvoidingView 
@@ -2105,11 +2163,37 @@ const ExameFisico = ({ navigation, route }) => {
                         ))}
                     </View>
                     
-                    <TouchableOpacity style={styles.saveButtonBottom} onPress={salvarExame}>
-                        <Text style={styles.saveButtonBottomText}>💾 Salvar Exame Físico</Text>
-                    </TouchableOpacity>
                 </ScrollView>
             </KeyboardAvoidingView>
+
+            {/* Botão para Exames Complementares - Posicionado na tela principal */}
+            <View style={styles.examesComplementaresContainer}>
+                <TouchableOpacity 
+                    style={styles.examesComplementaresButton}
+                    onPress={() => navigation.navigate('ExamesComplementares', { paciente })}
+                >
+                    <Text style={styles.examesComplementaresButtonText}>
+                        🔬 Exames Complementares
+                    </Text>
+                </TouchableOpacity>
+            </View>
+            
+            {/* Modais */}
+            <ModalSalvarAvaliacao
+                visible={modalSalvarVisible}
+                onClose={() => setModalSalvarVisible(false)}
+                onConfirm={handleSalvarAvaliacao}
+                loading={salvando}
+                pontuacaoTotal={getPontuacaoTotal()}
+                statusGeral={getClassificacaoEvolucao(getPontuacaoTotal())}
+            />
+            
+            <ListaAvaliacoes
+                visible={modalListaVisible}
+                onClose={() => setModalListaVisible(false)}
+                onCarregarAvaliacao={handleCarregarAvaliacao}
+            />
+
             
             <Footer navigation={navigation} currentScreen="ExameFisico" />
         </SafeAreaView>
@@ -2143,18 +2227,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#fff',
         opacity: 0.9,
-    },
-    saveButton: {
-        backgroundColor: '#28a745',
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        borderRadius: 8,
-        marginLeft: 15,
-    },
-    saveButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 16,
     },
     keyboardAvoidingView: {
         flex: 1,
@@ -2433,24 +2505,6 @@ const styles = StyleSheet.create({
         color: '#495057',
         textAlign: 'center',
     },
-    saveButtonBottom: {
-        backgroundColor: '#28a745',
-        padding: 15,
-        borderRadius: 12,
-        marginTop: 30,
-        marginBottom: 20,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-    saveButtonBottomText: {
-        color: '#fff',
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
     // Estilos para a seção de evolução do paciente
     evolucaoContainer: {
         backgroundColor: '#f8f9fa',
@@ -2626,6 +2680,34 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: '#343a40',
         width: '15%',
+        textAlign: 'center',
+    },
+    // Estilos para o botão de Exames Complementares na tela principal
+    examesComplementaresContainer: {
+        paddingHorizontal: 20,
+        paddingVertical: 15,
+        backgroundColor: '#f8f9fa',
+        borderTopWidth: 1,
+        borderTopColor: '#e9ecef',
+    },
+    examesComplementaresButton: {
+        backgroundColor: '#007bff',
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 50,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    examesComplementaresButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
         textAlign: 'center',
     },
 });

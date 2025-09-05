@@ -8,12 +8,25 @@ import {
     TouchableOpacity,
     TextInput,
     KeyboardAvoidingView,
-    Platform
+    Platform,
+    Alert
 } from 'react-native';
 import Footer from '../components/Footer';
+import { useAvaliacaoConsolidada } from '../context/AvaliacaoConsolidadaContext';
+import { useAnamnese } from '../context/AnamneseContext';
 
 const ExamesComplementares = ({ navigation, route }) => {
     const { paciente } = route.params;
+    
+    // Hooks para acessar dados das outras telas
+    const { anamneseData } = useAnamnese();
+    const { 
+        consolidarDadosAvaliacao, 
+        formatarDadosAnamnese,
+        formatarDadosExameFisico,
+        formatarDadosExamesComplementares,
+        salvarAvaliacaoConsolidada 
+    } = useAvaliacaoConsolidada();
     
     // Estado para controlar quais seções estão expandidas
     const [expandedSections, setExpandedSections] = useState({});
@@ -532,6 +545,61 @@ const ExamesComplementares = ({ navigation, route }) => {
             [sectionKey]: !prev[sectionKey]
         }));
     };
+
+    // Função para salvar toda a avaliação (Anamnese + Exame Físico + Exames Complementares)
+    const handleSalvarAvaliacaoCompleta = () => {
+        Alert.alert(
+            'Salvar Avaliação Completa',
+            'Deseja consolidar e salvar todos os dados da avaliação (Anamnese, Exame Físico e Exames Complementares) e enviar para o Dashboard?',
+            [
+                { text: 'Cancelar', style: 'cancel' },
+                { 
+                    text: 'Salvar', 
+                    onPress: () => {
+                        try {
+                            console.log('🚀 Iniciando salvamento da avaliação completa...');
+                            console.log('📊 Dados do formData (Exames Complementares):', formData);
+                            console.log('📋 Dados da Anamnese:', anamneseData);
+
+                            // Formatar dados de todas as telas
+                            const dadosAnamnese = formatarDadosAnamnese(anamneseData || {});
+                            const dadosExameFisico = formatarDadosExameFisico({}); // Dados do exame físico (simulados por enquanto)
+                            const dadosExamesComplementares = formatarDadosExamesComplementares(formData);
+
+                            console.log('📝 Dados formatados da Anamnese:', dadosAnamnese);
+                            console.log('📝 Dados formatados do Exame Físico:', dadosExameFisico);
+                            console.log('📝 Dados formatados dos Exames Complementares:', dadosExamesComplementares);
+
+                            // Consolidar todos os dados
+                            const dadosConsolidados = consolidarDadosAvaliacao(
+                                dadosAnamnese,
+                                dadosExamesComplementares,
+                                dadosExameFisico,
+                                paciente
+                            );
+
+                            console.log('🔗 Dados consolidados:', dadosConsolidados);
+
+                            // Salvar no Context
+                            salvarAvaliacaoConsolidada(dadosConsolidados);
+
+                            // Navegar para o Dashboard
+                            navigation.navigate('Dashboard', { paciente });
+
+                            Alert.alert(
+                                'Sucesso!', 
+                                'Avaliação completa salva com sucesso! Todos os dados foram consolidados e enviados para o Dashboard.'
+                            );
+                        } catch (error) {
+                            console.error('❌ Erro ao salvar avaliação completa:', error);
+                            Alert.alert('Erro', 'Erro ao salvar a avaliação completa. Tente novamente.');
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
 
     // Dados das seções
     const sections = [
@@ -1148,9 +1216,9 @@ const ExamesComplementares = ({ navigation, route }) => {
                         <View style={styles.referenceValues}>
                             <Text style={styles.referenceTitle}>Valores de Referência:</Text>
                             <Text style={styles.referenceText}>• TGO (AST): 5-40 U/L</Text>
-                            <Text style={styles.referenceText}>• TGP (ALT): 7-56 U/L</Text>
+ennte                            <Text style={styles.referenceText}>• TGP (ALT): 7-56 U/L</Text>
                         </View>
-                        
+                         a
                         <View style={styles.formRow}>
                             <Text style={styles.formLabel}>Data de Realização:</Text>
                             <TextInput
@@ -5628,6 +5696,18 @@ const ExamesComplementares = ({ navigation, route }) => {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
+
+            {/* Botão para Salvar Avaliação Completa */}
+            <View style={styles.salvarAvaliacaoCompletaContainer}>
+                <TouchableOpacity 
+                    style={styles.salvarAvaliacaoCompletaButton}
+                    onPress={handleSalvarAvaliacaoCompleta}
+                >
+                    <Text style={styles.salvarAvaliacaoCompletaButtonText}>
+                        💾 Salvar Avaliação Completa
+                    </Text>
+                </TouchableOpacity>
+            </View>
             
             <Footer navigation={navigation} currentScreen="ExamesComplementares" />
         </SafeAreaView>
@@ -6002,6 +6082,34 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: '#343a40',
         width: '15%',
+        textAlign: 'center',
+    },
+    // Estilos para o botão de salvar avaliação completa
+    salvarAvaliacaoCompletaContainer: {
+        paddingHorizontal: 20,
+        paddingVertical: 15,
+        backgroundColor: '#f8f9fa',
+        borderTopWidth: 1,
+        borderTopColor: '#e9ecef',
+    },
+    salvarAvaliacaoCompletaButton: {
+        backgroundColor: '#28a745',
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 50,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    salvarAvaliacaoCompletaButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
         textAlign: 'center',
     },
 });

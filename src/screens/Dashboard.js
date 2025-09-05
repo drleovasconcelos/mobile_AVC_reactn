@@ -11,11 +11,13 @@ import {
 } from 'react-native';
 import Footer from '../components/Footer';
 import { useAnamnese } from '../context/AnamneseContext';
+import { useAvaliacaoConsolidada } from '../context/AvaliacaoConsolidadaContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Dashboard = ({ navigation, route }) => {
     const { paciente } = route.params;
     const { getAnamneseData } = useAnamnese();
+    const { avaliacaoConsolidada } = useAvaliacaoConsolidada();
     
     // Estado para controlar o status de salvamento
     const [isSaving, setIsSaving] = useState(false);
@@ -501,6 +503,26 @@ const Dashboard = ({ navigation, route }) => {
                         </Text>
                     )}
 
+                    {/* Avaliação Consolidada */}
+                    {avaliacaoConsolidada && (
+                        <View style={styles.avaliacaoConsolidadaContainer}>
+                            <Text style={styles.avaliacaoConsolidadaTitle}>
+                                📋 AVALIAÇÃO CONSOLIDADA
+                            </Text>
+                            <Text style={styles.avaliacaoConsolidadaSubtitle}>
+                                Dados consolidados de todas as avaliações
+                            </Text>
+                            <View style={styles.avaliacaoConsolidadaContent}>
+                                <Text style={styles.avaliacaoConsolidadaText}>
+                                    {avaliacaoConsolidada.blocoConsolidado}
+                                </Text>
+                            </View>
+                            <Text style={styles.avaliacaoConsolidadaFooter}>
+                                Avaliação consolidada em: {avaliacaoConsolidada.dataCriacao} às {avaliacaoConsolidada.horaCriacao}
+                            </Text>
+                        </View>
+                    )}
+
                     {/* Rodapé do documento */}
                     <Text style={styles.documentFooter}>
                         {'\n'}=================================={'\n'}
@@ -804,6 +826,54 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: '#e9ecef',
         lineHeight: 18,
+    },
+    // Estilos para avaliação consolidada
+    avaliacaoConsolidadaContainer: {
+        backgroundColor: '#e8f5e8',
+        borderRadius: 12,
+        padding: 20,
+        marginTop: 20,
+        borderWidth: 2,
+        borderColor: '#28a745',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    avaliacaoConsolidadaTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#155724',
+        textAlign: 'center',
+        marginBottom: 8,
+    },
+    avaliacaoConsolidadaSubtitle: {
+        fontSize: 14,
+        color: '#155724',
+        textAlign: 'center',
+        marginBottom: 15,
+        fontStyle: 'italic',
+    },
+    avaliacaoConsolidadaContent: {
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        padding: 15,
+        borderWidth: 1,
+        borderColor: '#c3e6cb',
+    },
+    avaliacaoConsolidadaText: {
+        fontSize: 12,
+        color: '#343a40',
+        lineHeight: 18,
+        fontFamily: 'monospace',
+    },
+    avaliacaoConsolidadaFooter: {
+        fontSize: 12,
+        color: '#155724',
+        textAlign: 'center',
+        marginTop: 10,
+        fontStyle: 'italic',
     },
 });
 

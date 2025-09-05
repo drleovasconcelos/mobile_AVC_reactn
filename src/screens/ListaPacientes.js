@@ -36,6 +36,10 @@ const ListaPacientes = ({ navigation }) => {
                     onPress: () => navigation.navigate('AvaliacaoPaciente', { paciente }) 
                 },
                 { text: 'Editar', onPress: () => console.log('Editar paciente:', paciente.id) },
+                { 
+                    text: 'Buscar Avaliação', 
+                    onPress: () => navigation.navigate('BuscarAvaliacao', { paciente }) 
+                },
                 { text: 'Fechar', style: 'cancel' }
             ]
         );
