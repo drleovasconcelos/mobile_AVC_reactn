@@ -6,11 +6,13 @@ import {
     SafeAreaView,
     ScrollView,
     TouchableOpacity,
-    TextInput,
     KeyboardAvoidingView,
     Platform,
     Alert
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 import Footer from '../components/Footer';
 
 const EscalasHospitalares = ({ navigation, route }) => {
@@ -19,106 +21,66 @@ const EscalasHospitalares = ({ navigation, route }) => {
     // Estado para controlar quais seções estão expandidas
     const [expandedSections, setExpandedSections] = useState({});
     
-    // Estado para os dados das escalas
-    const [formData, setFormData] = useState({
-        // Escala de Glasgow
-        glasgowAberturaOcular: '',
-        glasgowRespostaVerbal: '',
-        glasgowRespostaMotora: '',
-        glasgowTotal: '',
-        
-        // Escala de Braden
-        bradenPercepcaoSensorial: '',
-        bradenUmidade: '',
-        bradenAtividade: '',
-        bradenMobilidade: '',
-        bradenNutricao: '',
-        bradenFriccaoCisalhamento: '',
-        bradenTotal: '',
-        
-        // Escala de Morse
-        morseHistoricoQuedas: '',
-        morseDiagnosticoSecundario: '',
-        morseDeambulacao: '',
-        morseTerapiaEndovenosa: '',
-        morseMarcha: '',
-        morseEstadoMental: '',
-        morseTotal: '',
-        
-        // Escala de Waterlow
-        waterlowConstituicaoCorporal: '',
-        waterlowContinencia: '',
-        waterlowMobilidade: '',
-        waterlowSexo: '',
-        waterlowIdade: '',
-        waterlowApetite: '',
-        waterlowMedicamentos: '',
-        waterlowTotal: '',
-        
-        // Escala de Norton
-        nortonEstadoFisico: '',
-        nortonEstadoMental: '',
-        nortonAtividade: '',
-        nortonMobilidade: '',
-        nortonIncontinencia: '',
-        nortonTotal: '',
-        
-        // Escala de Ramsay
-        ramsayNivelSedacao: '',
-        ramsayObservacoes: '',
-        
-        // Escala de RASS
-        rassNivelAgitacao: '',
-        rassObservacoes: '',
-        
-        // Escala de CAM-ICU
-        camIcuAtencao: '',
-        camIcuMudanca: '',
-        camIcuIncoerencia: '',
-        camIcuResultado: '',
-        
-        // Escala de APACHE II
-        apacheIdade: '',
-        apacheTemperatura: '',
-        apachePressaoArterial: '',
-        apacheFrequenciaCardiaca: '',
-        apacheFrequenciaRespiratoria: '',
-        apacheOximetria: '',
-        apachePh: '',
-        apacheSodio: '',
-        apachePotassio: '',
-        apacheCreatinina: '',
-        apacheHematocrito: '',
-        apacheLeucocitos: '',
-        apacheGlasgow: '',
-        apacheTotal: '',
-        
-        // Observações gerais
-        observacoes: '',
-        dataAvaliacao: '',
-        profissionalResponsavel: ''
-    });
+    // Estados para as escalas
+    // Glasgow
+    const [eyeResponse, setEyeResponse] = useState(4);
+    const [verbalResponse, setVerbalResponse] = useState(5);
+    const [motorResponse, setMotorResponse] = useState(6);
+    const [pupilResponse, setPupilResponse] = useState(0);
+    
+    // RASS
+    const [rassScore, setRassScore] = useState(0);
+    
+    // CAM-ICU
+    const [inicioAgudo, setInicioAgudo] = useState(0);
+    const [inatencao, setInatencao] = useState(0);
+    const [rassscore, setRassscore] = useState(0);
+    const [pensamentodesorganizado, setPensamentodesorganizado] = useState(1);
+    
+    // Ashworth
+    const [ashworthSelected, setAshworthSelected] = useState(null);
+    
+    // Ramsay
+    const [ramsayScore, setRamsayScore] = useState(1);
+    
+    // AVPU
+    const [avpuLevel, setAvpuLevel] = useState('');
+    
+    // MRC
+    const [flexaoOmbroEsq, setFlexaoOmbroEsq] = useState(1);
+    const [flexaoOmbroDir, setFlexaoOmbroDir] = useState(1);
+    const [cotoveloEsq, setCotoveloEsq] = useState(1);
+    const [cotoveloDir, setCotoveloDir] = useState(1);
+    const [punhoEsq, setPunhoEsq] = useState(1);
+    const [punhoDir, setPunhoDir] = useState(1);
+    const [quadrilEsq, setQuadrilEsq] = useState(1);
+    const [quadrilDir, setQuadrilDir] = useState(1);
+    const [joelhoEsq, setJoelhoEsq] = useState(1);
+    const [joelhoDir, setJoelhoDir] = useState(1);
+    const [tornozeloEsq, setTornozeloEsq] = useState(1);
+    const [tornozeloDir, setTornozeloDir] = useState(1);
+    
+    // Rankin
+    const [rankinLevel, setRankinLevel] = useState('');
+    
+    // Cincinnati
+    const [face, setFace] = useState('normal');
+    const [arm, setArm] = useState('normal');
+    const [speech, setSpeech] = useState('normal');
+    
+    // Wexler
+    const [wexlerSelected, setWexlerSelected] = useState(null);
 
-    // useEffect para carregar dados salvos quando o componente montar
-    useEffect(() => {
-        // Aqui você pode implementar a lógica para carregar dados salvos
-        // const dadosSalvos = getEscalasHospitalaresData(paciente.prontuario);
-        // if (dadosSalvos) {
-        //     setFormData(dadosSalvos);
-        // }
-    }, [paciente.prontuario]);
-
-    // useEffect para salvar dados automaticamente
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            if (Object.keys(formData).some(key => formData[key] !== '')) {
-                // Aqui você pode implementar a lógica para salvar dados
-                // salvarEscalasHospitalares(paciente.prontuario, formData);
-            }
-        }, 1000); // Aguarda 1 segundo antes de salvar
-
-        return () => clearTimeout(timeoutId);
-    }, [formData, paciente.prontuario]);
+    // Funções de cálculo
+    const baseScore = Number(eyeResponse) + Number(verbalResponse) + Number(motorResponse);
+    const totalScore = baseScore + Number(pupilResponse);
+    
+    const MRCScore = Number(flexaoOmbroEsq) + Number(flexaoOmbroDir) + Number(cotoveloEsq) + 
+                    Number(cotoveloDir) + Number(punhoEsq) + Number(punhoDir) + Number(quadrilEsq) + 
+                    Number(quadrilDir) + Number(joelhoEsq) + Number(joelhoDir) + Number(tornozeloEsq) + 
+                    Number(tornozeloDir);
+    
+    const isAbnormal = face !== 'normal' || arm !== 'normal' || speech !== 'normal';
 
     // Função para alternar o estado de expansão de uma seção
     const toggleSection = (sectionKey) => {
@@ -126,6 +88,86 @@ const EscalasHospitalares = ({ navigation, route }) => {
             ...prev,
             [sectionKey]: !prev[sectionKey]
         }));
+    };
+
+    // Funções de interpretação
+    const getGlasgowInterpretation = () => {
+        if (totalScore <= 8) return '🔴 Comprometimento CEREBRAL GRAVE';
+        if (totalScore <= 12) return '🟠 Comprometimento CEREBRAL MODERADO';
+        if (totalScore <= 15) return '🟢 Comprometimento CEREBRAL LEVE';
+        return '❓ Fora da escala';
+    };
+
+    const getRassInterpretation = () => {
+        switch (rassScore) {
+            case +4: return '🔴 Combativo: violento, perigo imediato para equipe';
+            case +3: return '🔴 Muito agitado: puxa/remove tubos ou cateteres; agressivo';
+            case +2: return '🟠 Agitado: movimentos frequentes e sem propósito, resistência a ventilação';
+            case +1: return '🟠 Inquieto: ansioso, mas movimentos não agressivos/vigorosos';
+            case 0: return '🟢 Alerta e calmo';
+            case -1: return '🟠 Sonolento: não completamente alerta, mas desperta com estímulo verbal';
+            case -2: return '🔵 Sedação leve: desperta com estímulo físico';
+            case -3: return '🔵 Sedação moderada: movimento ou abertura ocular ao estímulo físico';
+            case -4: return '🔵 Sedação profunda: sem resposta ao estímulo verbal ou físico';
+            case -5: return '⚫️ Não despertável: sem resposta a qualquer estímulo';
+            default: return 'Selecione um valor na escala RASS';
+        }
+    };
+
+    const getCamIcuInterpretation = () => {
+        if (inicioAgudo == 0 && inatencao == 0 && rassscore == 0 && pensamentodesorganizado < 2) {
+            return '🟢 Paciente NÃO APRESENTA Delirium';
+        }
+        if (inicioAgudo > 0 || inatencao > 0 || rassscore != 0 || pensamentodesorganizado > 1) {
+            return '🔴 Paciente APRESENTA Delirium';
+        }
+        return '❓ Fora da escala';
+    };
+
+    const getRamsayInterpretation = () => {
+        switch (ramsayScore) {
+            case 1: return ' Ansioso, agitado ou inquieto';
+            case 2: return ' Cooperativo, orientado e tranquilo';
+            case 3: return ' Responde apenas a comandos verbais';
+            case 4: return ' Resposta rápida a estímulo tátil ou auditivo';
+            case 5: return ' Resposta lenta a estímulo doloroso';
+            case 6: return ' Sem resposta a qualquer estímulo (profunda sedação)';
+            default: return 'Selecione um nível da escala de Ramsay';
+        }
+    };
+
+    const getAvpuInterpretation = () => {
+        switch (avpuLevel) {
+            case 'A': return ' Alerta: paciente desperto, responde espontaneamente.';
+            case 'V': return ' Responde ao estímulo verbal: reage quando chamado.';
+            case 'P': return ' Responde ao estímulo doloroso: sem resposta verbal, mas reage à dor.';
+            case 'U': return ' Não responde: inconsciente, sem resposta a qualquer estímulo.';
+            default: return 'Selecione um nível da escala AVPU.';
+        }
+    };
+
+    const getMRCInterpretation = () => {
+        if (MRCScore <= 48) return '🔴 Paciente APRESENTA fraqueza muscular';
+        if (MRCScore <= 60) return '🟢 Paciente NÃO APRESENTA fraqueza muscular';
+        return '❓ Fora da escala';
+    };
+
+    const getRankinInterpretation = () => {
+        switch (rankinLevel) {
+            case '0': return '0 – Sem sintomas.';
+            case '1': return '1 – Sem incapacidade significativa; consegue realizar todas as atividades habituais, apesar de sintomas.';
+            case '2': return '2 – Incapacidade leve; incapaz de realizar todas as atividades anteriores, mas é capaz de cuidar de si mesmo sem assistência.';
+            case '3': return '3 – Incapacidade moderada; requer alguma ajuda, mas consegue andar sem assistência.';
+            case '4': return '4 – Incapacidade moderadamente grave; incapaz de andar sem assistência e incapaz de atender às próprias necessidades físicas sem ajuda.';
+            case '5': return '5 – Incapacidade grave; acamado, incontinente e requer cuidados constantes.';
+            case '6': return '6 – Óbito.';
+            default: return 'Selecione um nível da Escala de Rankin.';
+        }
+    };
+
+    const getCincinnatiResult = () => {
+        if (isAbnormal) return '🔴 Suspeita de AVC - Encaminhar imediatamente!';
+        return '🟢 Sem sinais de AVC detectados.';
     };
 
     // Dados das seções
@@ -137,46 +179,58 @@ const EscalasHospitalares = ({ navigation, route }) => {
             content: 'Avaliação do nível de consciência'
         },
         {
-            key: 'braden',
-            title: '2. ESCALA DE BRADEN',
-            icon: '🛏️',
-            content: 'Avaliação do risco de úlceras por pressão'
-        },
-        {
-            key: 'morse',
-            title: '3. ESCALA DE MORSE',
-            icon: '⚠️',
-            content: 'Avaliação do risco de quedas'
-        },
-        {
-            key: 'waterlow',
-            title: '4. ESCALA DE WATERLOW',
-            icon: '💧',
-            content: 'Avaliação do risco de úlceras por pressão'
-        },
-        {
-            key: 'norton',
-            title: '5. ESCALA DE NORTON',
-            icon: '📊',
-            content: 'Avaliação do risco de úlceras por pressão'
-        },
-        {
-            key: 'sedacao',
-            title: '6. ESCALAS DE SEDAÇÃO',
+            key: 'rass',
+            title: '2. ESCALA RASS',
             icon: '😴',
-            content: 'Ramsay e RASS - Avaliação do nível de sedação'
+            content: 'Escala de Agitação-Sedação de Richmond'
         },
         {
-            key: 'delirium',
-            title: '7. ESCALA CAM-ICU',
+            key: 'camIcu',
+            title: '3. ESCALA CAM-ICU',
             icon: '🔍',
             content: 'Avaliação de delirium em UTI'
         },
         {
-            key: 'apache',
-            title: '8. ESCALA APACHE II',
-            icon: '🏥',
-            content: 'Avaliação da gravidade em UTI'
+            key: 'ashworth',
+            title: '4. ESCALA DE ASHWORTH',
+            icon: '💪',
+            content: 'Avaliação de espasticidade muscular'
+        },
+        {
+            key: 'ramsay',
+            title: '5. ESCALA DE RAMSAY',
+            icon: '😴',
+            content: 'Avaliação do nível de sedação'
+        },
+        {
+            key: 'avpu',
+            title: '6. ESCALA AVPU',
+            icon: '👁️',
+            content: 'Avaliação rápida do nível de consciência'
+        },
+        {
+            key: 'mrc',
+            title: '7. ESCALA MRC',
+            icon: '💪',
+            content: 'Avaliação da força muscular'
+        },
+        {
+            key: 'rankin',
+            title: '8. ESCALA DE RANKIN',
+            icon: '📊',
+            content: 'Avaliação de incapacidade funcional pós-AVC'
+        },
+        {
+            key: 'cincinnati',
+            title: '9. ESCALA DE CINCINNATI',
+            icon: '🚨',
+            content: 'Identificação de sinais de AVC'
+        },
+        {
+            key: 'wexler',
+            title: '10. ESCALA DE WEXLER',
+            icon: '🦵',
+            content: 'Avaliação de reflexos tendinosos'
         }
     ];
 
@@ -191,453 +245,124 @@ const EscalasHospitalares = ({ navigation, route }) => {
                             Avaliação do nível de consciência (3-15 pontos)
                         </Text>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Abertura Ocular:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.glasgowAberturaOcular}
-                                onChangeText={(text) => setFormData({...formData, glasgowAberturaOcular: text})}
-                                placeholder="1-4 pontos"
-                                keyboardType="numeric"
-                            />
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Abertura Ocular (E)</Text>
+                            <Picker
+                                selectedValue={eyeResponse}
+                                onValueChange={(itemValue) => setEyeResponse(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="4 - Abertura espontânea" value={4} />
+                                <Picker.Item label="3 - Ao estímulo verbal" value={3} />
+                                <Picker.Item label="2 - À pressão" value={2} />
+                                <Picker.Item label="1 - Nenhuma" value={1} />
+                                <Picker.Item label="NT - Não Testável" value={0} />
+                            </Picker>
                         </View>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Resposta Verbal:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.glasgowRespostaVerbal}
-                                onChangeText={(text) => setFormData({...formData, glasgowRespostaVerbal: text})}
-                                placeholder="1-5 pontos"
-                                keyboardType="numeric"
-                            />
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Resposta Verbal (V)</Text>
+                            <Picker
+                                selectedValue={verbalResponse}
+                                onValueChange={(itemValue) => setVerbalResponse(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="5 - Orientado" value={5} />
+                                <Picker.Item label="4 - Confuso" value={4} />
+                                <Picker.Item label="3 - Palavras" value={3} />
+                                <Picker.Item label="2 - Sons" value={2} />
+                                <Picker.Item label="1 - Nenhuma" value={1} />
+                                <Picker.Item label="NT - Não Testável" value={0} />
+                            </Picker>
                         </View>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Resposta Motora:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.glasgowRespostaMotora}
-                                onChangeText={(text) => setFormData({...formData, glasgowRespostaMotora: text})}
-                                placeholder="1-6 pontos"
-                                keyboardType="numeric"
-                            />
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Resposta Motora (M)</Text>
+                            <Picker
+                                selectedValue={motorResponse}
+                                onValueChange={(itemValue) => setMotorResponse(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="6 - Obedece comandos" value={6} />
+                                <Picker.Item label="5 - Localizado" value={5} />
+                                <Picker.Item label="4 - Flexão normal" value={4} />
+                                <Picker.Item label="3 - Flexão anormal" value={3} />
+                                <Picker.Item label="2 - Extensão" value={2} />
+                                <Picker.Item label="1 - Nenhuma" value={1} />
+                                <Picker.Item label="NT - Não Testável" value={0} />
+                            </Picker>
                         </View>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Total Glasgow:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.glasgowTotal}
-                                onChangeText={(text) => setFormData({...formData, glasgowTotal: text})}
-                                placeholder="3-15 pontos"
-                                keyboardType="numeric"
-                            />
+                        <View style={[styles.section, { backgroundColor: '#fff8e1' }]}>
+                            <Text style={styles.sectionTitle}>Resposta Pupilar (P)</Text>
+                            <Text style={{ color: '#d32f2f', marginBottom: 8 }}>
+                                ⚠️ Subtrai do score total!
+                            </Text>
+                            <Picker
+                                selectedValue={pupilResponse}
+                                onValueChange={(itemValue) => setPupilResponse(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="0 - Ambas pupilas reagem" value={0} />
+                                <Picker.Item label="-1 - Apenas uma pupila reage" value={-1} />
+                                <Picker.Item label="-2 - Nenhuma pupila reage" value={-2} />
+                            </Picker>
+                        </View>
+
+                        <View style={styles.resultContainer}>
+                            <Text style={styles.scoreText}>
+                                Score Base: {baseScore} (E{eyeResponse} + V{verbalResponse} + M{motorResponse})
+                            </Text>
+                            <Text style={styles.scoreText}>
+                                Resposta Pupilar: {pupilResponse} 
+                                {pupilResponse < 0 && " (reduz o score)"}
+                            </Text>
+                            <Text style={styles.finalScore}>
+                                SCORE FINAL: {baseScore} {pupilResponse} = {totalScore}
+                            </Text>
+                            <Text style={styles.interpretationText}>
+                                {getGlasgowInterpretation()}
+                            </Text>
                         </View>
                     </View>
                 );
 
-            case 'braden':
+            case 'rass':
                 return (
                     <View style={styles.formContent}>
-                        <Text style={styles.sectionSubtitle}>🛏️ ESCALA DE BRADEN</Text>
+                        <Text style={styles.sectionSubtitle}>😴 ESCALA RASS</Text>
                         <Text style={styles.formDescription}>
-                            Avaliação do risco de úlceras por pressão (6-23 pontos)
+                            Escala de Agitação-Sedação de Richmond
                         </Text>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Percepção Sensorial:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.bradenPercepcaoSensorial}
-                                onChangeText={(text) => setFormData({...formData, bradenPercepcaoSensorial: text})}
-                                placeholder="1-4 pontos"
-                                keyboardType="numeric"
-                            />
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Nível de Agitação/Sedação</Text>
+                            <Picker
+                                selectedValue={rassScore}
+                                onValueChange={(itemValue) => setRassScore(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="+4 - Combativo" value={+4} />
+                                <Picker.Item label="+3 - Muito agitado" value={+3} />
+                                <Picker.Item label="+2 - Agitado" value={+2} />
+                                <Picker.Item label="+1 - Inquieto" value={+1} />
+                                <Picker.Item label="0 - Alerta e calmo" value={0} />
+                                <Picker.Item label="-1 - Sonolento" value={-1} />
+                                <Picker.Item label="-2 - Sedação leve" value={-2} />
+                                <Picker.Item label="-3 - Sedação moderada" value={-3} />
+                                <Picker.Item label="-4 - Sedação profunda" value={-4} />
+                                <Picker.Item label="-5 - Não despertável" value={-5} />
+                            </Picker>
                         </View>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Umidade:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.bradenUmidade}
-                                onChangeText={(text) => setFormData({...formData, bradenUmidade: text})}
-                                placeholder="1-4 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Atividade:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.bradenAtividade}
-                                onChangeText={(text) => setFormData({...formData, bradenAtividade: text})}
-                                placeholder="1-4 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Mobilidade:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.bradenMobilidade}
-                                onChangeText={(text) => setFormData({...formData, bradenMobilidade: text})}
-                                placeholder="1-4 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Nutrição:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.bradenNutricao}
-                                onChangeText={(text) => setFormData({...formData, bradenNutricao: text})}
-                                placeholder="1-4 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Fricção e Cisalhamento:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.bradenFriccaoCisalhamento}
-                                onChangeText={(text) => setFormData({...formData, bradenFriccaoCisalhamento: text})}
-                                placeholder="1-3 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Total Braden:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.bradenTotal}
-                                onChangeText={(text) => setFormData({...formData, bradenTotal: text})}
-                                placeholder="6-23 pontos"
-                                keyboardType="numeric"
-                            />
+                        <View style={styles.resultContainer}>
+                            <Text style={styles.finalScore}>ESCALA RASS: {rassScore}</Text>
+                            <Text style={styles.interpretationText}>{getRassInterpretation()}</Text>
                         </View>
                     </View>
                 );
 
-            case 'morse':
-                return (
-                    <View style={styles.formContent}>
-                        <Text style={styles.sectionSubtitle}>⚠️ ESCALA DE MORSE</Text>
-                        <Text style={styles.formDescription}>
-                            Avaliação do risco de quedas (0-125 pontos)
-                        </Text>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Histórico de Quedas:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.morseHistoricoQuedas}
-                                onChangeText={(text) => setFormData({...formData, morseHistoricoQuedas: text})}
-                                placeholder="0-25 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Diagnóstico Secundário:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.morseDiagnosticoSecundario}
-                                onChangeText={(text) => setFormData({...formData, morseDiagnosticoSecundario: text})}
-                                placeholder="0-15 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Deambulação:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.morseDeambulacao}
-                                onChangeText={(text) => setFormData({...formData, morseDeambulacao: text})}
-                                placeholder="0-20 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Terapia Endovenosa:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.morseTerapiaEndovenosa}
-                                onChangeText={(text) => setFormData({...formData, morseTerapiaEndovenosa: text})}
-                                placeholder="0-20 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Marcha:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.morseMarcha}
-                                onChangeText={(text) => setFormData({...formData, morseMarcha: text})}
-                                placeholder="0-20 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Estado Mental:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.morseEstadoMental}
-                                onChangeText={(text) => setFormData({...formData, morseEstadoMental: text})}
-                                placeholder="0-15 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Total Morse:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.morseTotal}
-                                onChangeText={(text) => setFormData({...formData, morseTotal: text})}
-                                placeholder="0-125 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-                    </View>
-                );
-
-            case 'waterlow':
-                return (
-                    <View style={styles.formContent}>
-                        <Text style={styles.sectionSubtitle}>💧 ESCALA DE WATERLOW</Text>
-                        <Text style={styles.formDescription}>
-                            Avaliação do risco de úlceras por pressão
-                        </Text>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Constituição Corporal:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.waterlowConstituicaoCorporal}
-                                onChangeText={(text) => setFormData({...formData, waterlowConstituicaoCorporal: text})}
-                                placeholder="0-3 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Continência:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.waterlowContinencia}
-                                onChangeText={(text) => setFormData({...formData, waterlowContinencia: text})}
-                                placeholder="0-3 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Mobilidade:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.waterlowMobilidade}
-                                onChangeText={(text) => setFormData({...formData, waterlowMobilidade: text})}
-                                placeholder="0-5 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Sexo:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.waterlowSexo}
-                                onChangeText={(text) => setFormData({...formData, waterlowSexo: text})}
-                                placeholder="0-1 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Idade:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.waterlowIdade}
-                                onChangeText={(text) => setFormData({...formData, waterlowIdade: text})}
-                                placeholder="0-8 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Apetite:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.waterlowApetite}
-                                onChangeText={(text) => setFormData({...formData, waterlowApetite: text})}
-                                placeholder="0-3 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Medicamentos:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.waterlowMedicamentos}
-                                onChangeText={(text) => setFormData({...formData, waterlowMedicamentos: text})}
-                                placeholder="0-4 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Total Waterlow:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.waterlowTotal}
-                                onChangeText={(text) => setFormData({...formData, waterlowTotal: text})}
-                                placeholder="Total de pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-                    </View>
-                );
-
-            case 'norton':
-                return (
-                    <View style={styles.formContent}>
-                        <Text style={styles.sectionSubtitle}>📊 ESCALA DE NORTON</Text>
-                        <Text style={styles.formDescription}>
-                            Avaliação do risco de úlceras por pressão (5-20 pontos)
-                        </Text>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Estado Físico:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.nortonEstadoFisico}
-                                onChangeText={(text) => setFormData({...formData, nortonEstadoFisico: text})}
-                                placeholder="1-4 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Estado Mental:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.nortonEstadoMental}
-                                onChangeText={(text) => setFormData({...formData, nortonEstadoMental: text})}
-                                placeholder="1-4 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Atividade:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.nortonAtividade}
-                                onChangeText={(text) => setFormData({...formData, nortonAtividade: text})}
-                                placeholder="1-4 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Mobilidade:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.nortonMobilidade}
-                                onChangeText={(text) => setFormData({...formData, nortonMobilidade: text})}
-                                placeholder="1-4 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Incontinência:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.nortonIncontinencia}
-                                onChangeText={(text) => setFormData({...formData, nortonIncontinencia: text})}
-                                placeholder="1-4 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Total Norton:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.nortonTotal}
-                                onChangeText={(text) => setFormData({...formData, nortonTotal: text})}
-                                placeholder="5-20 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-                    </View>
-                );
-
-            case 'sedacao':
-                return (
-                    <View style={styles.formContent}>
-                        <Text style={styles.sectionSubtitle}>😴 ESCALAS DE SEDAÇÃO</Text>
-                        <Text style={styles.formDescription}>
-                            Avaliação do nível de sedação
-                        </Text>
-
-                        <Text style={styles.subsectionTitle}>Escala de Ramsay:</Text>
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Nível de Sedação:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.ramsayNivelSedacao}
-                                onChangeText={(text) => setFormData({...formData, ramsayNivelSedacao: text})}
-                                placeholder="1-6 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <Text style={styles.formLabel}>Observações Ramsay:</Text>
-                        <TextInput
-                            style={[styles.textInput, { height: 60, textAlignVertical: 'top' }]}
-                            value={formData.ramsayObservacoes}
-                            onChangeText={(text) => setFormData({...formData, ramsayObservacoes: text})}
-                            placeholder="Observações sobre o nível de sedação"
-                            multiline
-                        />
-
-                        <Text style={styles.subsectionTitle}>Escala RASS:</Text>
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Nível de Agitação:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.rassNivelAgitacao}
-                                onChangeText={(text) => setFormData({...formData, rassNivelAgitacao: text})}
-                                placeholder="-5 a +4 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <Text style={styles.formLabel}>Observações RASS:</Text>
-                        <TextInput
-                            style={[styles.textInput, { height: 60, textAlignVertical: 'top' }]}
-                            value={formData.rassObservacoes}
-                            onChangeText={(text) => setFormData({...formData, rassObservacoes: text})}
-                            placeholder="Observações sobre o nível de agitação"
-                            multiline
-                        />
-                    </View>
-                );
-
-            case 'delirium':
+            case 'camIcu':
                 return (
                     <View style={styles.formContent}>
                         <Text style={styles.sectionSubtitle}>🔍 ESCALA CAM-ICU</Text>
@@ -645,209 +370,348 @@ const EscalasHospitalares = ({ navigation, route }) => {
                             Avaliação de delirium em UTI
                         </Text>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Atenção:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.camIcuAtencao}
-                                onChangeText={(text) => setFormData({...formData, camIcuAtencao: text})}
-                                placeholder="Positivo/Negativo"
-                            />
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>
+                                O paciente teve flutuação do estado mental nas últimas 24 horas?
+                            </Text>
+                            <Picker
+                                selectedValue={inicioAgudo}
+                                onValueChange={(itemValue) => setInicioAgudo(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="1 - Não" value={0} />
+                                <Picker.Item label="2 - Sim" value={1} />
+                            </Picker>
                         </View>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Mudança:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.camIcuMudanca}
-                                onChangeText={(text) => setFormData({...formData, camIcuMudanca: text})}
-                                placeholder="Positivo/Negativo"
-                            />
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>
+                                Leia em voz alta as seguintes letras: "S, A, V, E, A, H, A, A, R, T".
+                            </Text>
+                            <Text style={styles.sectionTitle}>
+                                O paciente deve apertar sua mão apenas ao ouvir a letra 'A'.
+                            </Text>
+                            <Text style={styles.sectionTitle}>
+                                Quantos erros o paciente cometeu durante o teste?
+                            </Text>
+                            <Picker
+                                selectedValue={inatencao}
+                                onValueChange={(itemValue) => setInatencao(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="1 - Cometeu menos que 3 erros" value={0} />
+                                <Picker.Item label="2 - Cometeu 3 ou mais erros" value={1} />
+                            </Picker>
                         </View>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Incoerência:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.camIcuIncoerencia}
-                                onChangeText={(text) => setFormData({...formData, camIcuIncoerencia: text})}
-                                placeholder="Positivo/Negativo"
-                            />
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>
+                                Qual o Estado Atual Na escala de RASS (Richmond Agitation-Sedation Scale) do paciente.
+                            </Text>
+                            <Picker
+                                selectedValue={rassscore}
+                                onValueChange={(itemValue) => setRassscore(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="1 - Agressivo" value={4} />
+                                <Picker.Item label="2 - Muito Agitado" value={3} />
+                                <Picker.Item label="3 - Agitado" value={2} />
+                                <Picker.Item label="4 - Inquieto" value={1} />
+                                <Picker.Item label="5 - Tranquilo" value={0} />
+                                <Picker.Item label="6 - Sonolento" value={-1} />
+                                <Picker.Item label="7 - Acorda ao Estímulo leve" value={-2} />
+                                <Picker.Item label="8 - Sem Contato Visual" value={-3} />
+                                <Picker.Item label="9 - Acorda por Dor" value={-4} />
+                                <Picker.Item label="10 - Irresponsivo" value={-5} />
+                            </Picker>
                         </View>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Resultado CAM-ICU:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.camIcuResultado}
-                                onChangeText={(text) => setFormData({...formData, camIcuResultado: text})}
-                                placeholder="Positivo/Negativo"
-                            />
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>
+                                Realize as seguintes perguntas ao paciente:
+                            </Text>
+                            <Text style={styles.sectionTitle}>
+                                1. Uma pedra flutua na água? (ou: uma folha flutua na água?)
+                            </Text>
+                            <Text style={styles.sectionTitle}>
+                                2. No mar tem peixes? (ou: no mar tem elefantes?)
+                            </Text>
+                            <Text style={styles.sectionTitle}>
+                                3. Um 1kg pesa mais que 2kg? (ou: 2kg pesam mais que 1kg?)
+                            </Text>
+                            <Text style={styles.sectionTitle}>
+                                4. Você pode usar um martelo para bater um prego? (ou: você pode usar um martelo para cortar madeira?)
+                            </Text>
+                            <Text style={styles.sectionTitle}>
+                                Comando: Diga ao paciente: "Levante estes dedos" Em seguida: "Agora faça a mesma coisa com a outra mão"
+                            </Text>
+                            <Picker
+                                selectedValue={pensamentodesorganizado}
+                                onValueChange={(itemValue) => setPensamentodesorganizado(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="1 - Cometeu menos que 2 erros" value={0} />
+                                <Picker.Item label="2 - Cometeu 2 ou mais erros" value={1} />
+                            </Picker>
+                        </View>
+
+                        <View style={styles.resultContainer}>
+                            <Text style={styles.finalScore}>RESULTADO:</Text>
+                            <Text style={styles.interpretationText}>{getCamIcuInterpretation()}</Text>
                         </View>
                     </View>
                 );
 
-            case 'apache':
+            case 'ashworth':
+                const ashworthOptions = [
+                    { id: 0, label: "0 - Tônus normal" },
+                    { id: 1, label: "1 - Aumento leve no final do arco de movimento" },
+                    { id: 2, label: "1+ - Aumento em menos da metade do arco de movimento" },
+                    { id: 3, label: "2 - Aumento significativo do tônus muscular" },
+                    { id: 4, label: "3 - Movimento difícil por aumento do tônus" },
+                    { id: 5, label: "4 - Rigidez total da parte examinada" },
+                ];
+
                 return (
                     <View style={styles.formContent}>
-                        <Text style={styles.sectionSubtitle}>🏥 ESCALA APACHE II</Text>
+                        <Text style={styles.sectionSubtitle}>💪 ESCALA DE ASHWORTH</Text>
                         <Text style={styles.formDescription}>
-                            Avaliação da gravidade em UTI (0-71 pontos)
+                            Avaliação de espasticidade muscular
                         </Text>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Idade:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.apacheIdade}
-                                onChangeText={(text) => setFormData({...formData, apacheIdade: text})}
-                                placeholder="0-6 pontos"
-                                keyboardType="numeric"
-                            />
+                        {ashworthOptions.map((option) => (
+                            <TouchableOpacity
+                                key={option.id}
+                                style={[
+                                    styles.option,
+                                    ashworthSelected === option.id ? styles.selectedOption : null,
+                                ]}
+                                onPress={() => setAshworthSelected(option.id)}
+                            >
+                                <Text style={styles.optionText}>{option.label}</Text>
+                            </TouchableOpacity>
+                        ))}
+
+                        {ashworthSelected !== null && (
+                            <Text style={styles.result}>
+                                Você selecionou: {ashworthOptions[ashworthSelected].label}
+                            </Text>
+                        )}
+                    </View>
+                );
+
+            case 'ramsay':
+                return (
+                    <View style={styles.formContent}>
+                        <Text style={styles.sectionSubtitle}>😴 ESCALA DE RAMSAY</Text>
+                        <Text style={styles.formDescription}>
+                            Avaliação do nível de sedação
+                        </Text>
+
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Nível de Sedação</Text>
+                            <Picker
+                                selectedValue={ramsayScore}
+                                onValueChange={(itemValue) => setRamsayScore(Number(itemValue))}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="1 - Ansioso, agitado ou inquieto" value={1} />
+                                <Picker.Item label="2 - Cooperativo, orientado e tranquilo" value={2} />
+                                <Picker.Item label="3 - Responde apenas a comandos verbais" value={3} />
+                                <Picker.Item label="4 - Resposta rápida a estímulo tátil ou auditivo" value={4} />
+                                <Picker.Item label="5 - Resposta lenta a estímulo doloroso" value={5} />
+                                <Picker.Item label="6 - Sem resposta a qualquer estímulo" value={6} />
+                            </Picker>
                         </View>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Temperatura:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.apacheTemperatura}
-                                onChangeText={(text) => setFormData({...formData, apacheTemperatura: text})}
-                                placeholder="0-4 pontos"
-                                keyboardType="numeric"
-                            />
+                        <View style={styles.resultContainer}>
+                            <Text style={styles.finalScore}>ESCALA RAMSAY: {ramsayScore}</Text>
+                            <Text style={styles.interpretationText}>{getRamsayInterpretation()}</Text>
+                        </View>
+                    </View>
+                );
+
+            case 'avpu':
+                return (
+                    <View style={styles.formContent}>
+                        <Text style={styles.sectionSubtitle}>👁️ ESCALA AVPU</Text>
+                        <Text style={styles.formDescription}>
+                            Avaliação rápida do nível de consciência
+                        </Text>
+
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Selecione o nível:</Text>
+                            <Picker
+                                selectedValue={avpuLevel}
+                                onValueChange={(itemValue) => setAvpuLevel(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="Escolha uma opção" value="" />
+                                <Picker.Item label="A - Alerta" value="A" />
+                                <Picker.Item label="V - Verbal" value="V" />
+                                <Picker.Item label="P - Dor" value="P" />
+                                <Picker.Item label="U - Não responsivo" value="U" />
+                            </Picker>
                         </View>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Pressão Arterial:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.apachePressaoArterial}
-                                onChangeText={(text) => setFormData({...formData, apachePressaoArterial: text})}
-                                placeholder="0-4 pontos"
-                                keyboardType="numeric"
-                            />
+                        <View style={styles.resultContainer}>
+                            <Text style={styles.resultLabel}>Resultado:</Text>
+                            <Text style={styles.interpretationText}>{getAvpuInterpretation()}</Text>
+                        </View>
+                    </View>
+                );
+
+            case 'mrc':
+                return (
+                    <View style={styles.formContent}>
+                        <Text style={styles.sectionSubtitle}>💪 ESCALA MRC</Text>
+                        <Text style={styles.formDescription}>
+                            Avaliação da força muscular
+                        </Text>
+
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Flexão de Ombro (Esquerdo)</Text>
+                            <Picker
+                                selectedValue={flexaoOmbroEsq}
+                                onValueChange={(itemValue) => setFlexaoOmbroEsq(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="5 - consegue flexionar e vence grande resistencia" value={5} />
+                                <Picker.Item label="4 - consegue flexionar e vence pouca resistencia" value={4} />
+                                <Picker.Item label="3 - consegue flexionar sem resistencia" value={3} />
+                                <Picker.Item label="2 - não consegue flexionar por completo" value={2} />
+                                <Picker.Item label="1 - Não Testável" value={1} />
+                            </Picker>
                         </View>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Frequência Cardíaca:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.apacheFrequenciaCardiaca}
-                                onChangeText={(text) => setFormData({...formData, apacheFrequenciaCardiaca: text})}
-                                placeholder="0-4 pontos"
-                                keyboardType="numeric"
-                            />
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Flexão de Ombro (Direito)</Text>
+                            <Picker
+                                selectedValue={flexaoOmbroDir}
+                                onValueChange={(itemValue) => setFlexaoOmbroDir(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="5 - consegue flexionar e vence grande resistencia" value={5} />
+                                <Picker.Item label="4 - consegue flexionar e vence pouca resistencia" value={4} />
+                                <Picker.Item label="3 - consegue flexionar sem resistencia" value={3} />
+                                <Picker.Item label="2 - não consegue flexionar por completo" value={2} />
+                                <Picker.Item label="1 - Não Testável" value={1} />
+                            </Picker>
                         </View>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Frequência Respiratória:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.apacheFrequenciaRespiratoria}
-                                onChangeText={(text) => setFormData({...formData, apacheFrequenciaRespiratoria: text})}
-                                placeholder="0-4 pontos"
-                                keyboardType="numeric"
-                            />
+                        <View style={styles.resultContainer}>
+                            <Text style={styles.finalScore}>SCORE FINAL: {MRCScore}</Text>
+                            <Text style={styles.interpretationText}>{getMRCInterpretation()}</Text>
+                        </View>
+                    </View>
+                );
+
+            case 'rankin':
+                return (
+                    <View style={styles.formContent}>
+                        <Text style={styles.sectionSubtitle}>📊 ESCALA DE RANKIN</Text>
+                        <Text style={styles.formDescription}>
+                            Avaliação de incapacidade funcional pós-AVC
+                        </Text>
+
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Selecione o nível:</Text>
+                            <Picker
+                                selectedValue={rankinLevel}
+                                onValueChange={(itemValue) => setRankinLevel(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="Escolha uma opção" value="" />
+                                <Picker.Item label="0 – Sem sintomas" value="0" />
+                                <Picker.Item label="1 – Sem incapacidade significativa" value="1" />
+                                <Picker.Item label="2 – Incapacidade leve" value="2" />
+                                <Picker.Item label="3 – Incapacidade moderada" value="3" />
+                                <Picker.Item label="4 – Incapacidade moderadamente grave" value="4" />
+                                <Picker.Item label="5 – Incapacidade grave" value="5" />
+                                <Picker.Item label="6 – Óbito" value="6" />
+                            </Picker>
                         </View>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Oximetria:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.apacheOximetria}
-                                onChangeText={(text) => setFormData({...formData, apacheOximetria: text})}
-                                placeholder="0-4 pontos"
-                                keyboardType="numeric"
-                            />
+                        <View style={styles.resultContainer}>
+                            <Text style={styles.resultLabel}>Resultado:</Text>
+                            <Text style={styles.interpretationText}>{getRankinInterpretation()}</Text>
+                        </View>
+                    </View>
+                );
+
+            case 'cincinnati':
+                return (
+                    <View style={styles.formContent}>
+                        <Text style={styles.sectionSubtitle}>🚨 ESCALA DE CINCINNATI</Text>
+                        <Text style={styles.formDescription}>
+                            Identificação de sinais de AVC
+                        </Text>
+
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>1. Paralisia Facial</Text>
+                            <Picker selectedValue={face} onValueChange={(v) => setFace(v)} style={styles.picker}>
+                                <Picker.Item label="Normal" value="normal" />
+                                <Picker.Item label="Anormal" value="abnormal" />
+                            </Picker>
                         </View>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>pH:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.apachePh}
-                                onChangeText={(text) => setFormData({...formData, apachePh: text})}
-                                placeholder="0-4 pontos"
-                                keyboardType="numeric"
-                            />
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>2. Fraqueza em um dos Braços</Text>
+                            <Picker selectedValue={arm} onValueChange={(v) => setArm(v)} style={styles.picker}>
+                                <Picker.Item label="Normal" value="normal" />
+                                <Picker.Item label="Anormal" value="anormal" />
+                            </Picker>
                         </View>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Sódio:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.apacheSodio}
-                                onChangeText={(text) => setFormData({...formData, apacheSodio: text})}
-                                placeholder="0-4 pontos"
-                                keyboardType="numeric"
-                            />
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>3. Alteração da Fala</Text>
+                            <Picker selectedValue={speech} onValueChange={(v) => setSpeech(v)} style={styles.picker}>
+                                <Picker.Item label="Normal" value="normal" />
+                                <Picker.Item label="Anormal" value="abnormal" />
+                            </Picker>
                         </View>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Potássio:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.apachePotassio}
-                                onChangeText={(text) => setFormData({...formData, apachePotassio: text})}
-                                placeholder="0-4 pontos"
-                                keyboardType="numeric"
-                            />
+                        <View style={styles.resultContainer}>
+                            <Text style={styles.resultText}>{getCincinnatiResult()}</Text>
                         </View>
+                    </View>
+                );
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Creatinina:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.apacheCreatinina}
-                                onChangeText={(text) => setFormData({...formData, apacheCreatinina: text})}
-                                placeholder="0-4 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
+            case 'wexler':
+                const wexlerOptions = [
+                    { id: 0, label: "0 - Ausente - Sem resposta visível e palpável" },
+                    { id: 1, label: "+1 - Hiporreflexia - Pequena contração muscular, sem movimento" },
+                    { id: 2, label: "+2 - Normal - Pequena contração e pequeno movimento" },
+                    { id: 3, label: "+3 - Hiperreflexia - Contração brusca e movimento articular moderado" },
+                    { id: 4, label: "+4 - Hiperreflexia com clônus transitório - Forte contração, com 1 a 3 clônus. Possível irradiação contralateral" },
+                    { id: 5, label: "+5 - Hiperreflexia com clônus sustentado - Forte contração e clônus sustentado." },
+                ];
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Hematócrito:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.apacheHematocrito}
-                                onChangeText={(text) => setFormData({...formData, apacheHematocrito: text})}
-                                placeholder="0-4 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
+                return (
+                    <View style={styles.formContent}>
+                        <Text style={styles.sectionSubtitle}>🦵 ESCALA DE WEXLER</Text>
+                        <Text style={styles.formDescription}>
+                            Avaliação de reflexos tendinosos
+                        </Text>
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Leucócitos:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.apacheLeucocitos}
-                                onChangeText={(text) => setFormData({...formData, apacheLeucocitos: text})}
-                                placeholder="0-4 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
+                        {wexlerOptions.map((option) => (
+                            <TouchableOpacity
+                                key={option.id}
+                                style={[
+                                    styles.option,
+                                    wexlerSelected === option.id ? styles.selectedOption : null,
+                                ]}
+                                onPress={() => setWexlerSelected(option.id)}
+                            >
+                                <Text style={styles.optionText}>{option.label}</Text>
+                            </TouchableOpacity>
+                        ))}
 
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Glasgow:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.apacheGlasgow}
-                                onChangeText={(text) => setFormData({...formData, apacheGlasgow: text})}
-                                placeholder="0-12 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Total APACHE II:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.apacheTotal}
-                                onChangeText={(text) => setFormData({...formData, apacheTotal: text})}
-                                placeholder="0-71 pontos"
-                                keyboardType="numeric"
-                            />
-                        </View>
+                        {wexlerSelected !== null && (
+                            <Text style={styles.result}>
+                                Você selecionou: {wexlerOptions[wexlerSelected].label}
+                            </Text>
+                        )}
                     </View>
                 );
 
@@ -913,39 +777,6 @@ const EscalasHospitalares = ({ navigation, route }) => {
                         ))}
                     </View>
 
-                    {/* Informações Gerais */}
-                    <View style={styles.generalInfoContainer}>
-                        <Text style={styles.sectionSubtitle}>📋 INFORMAÇÕES GERAIS</Text>
-                        
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Data da Avaliação:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.dataAvaliacao}
-                                onChangeText={(text) => setFormData({...formData, dataAvaliacao: text})}
-                                placeholder="DD/MM/AAAA"
-                            />
-                        </View>
-
-                        <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>Profissional Responsável:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                value={formData.profissionalResponsavel}
-                                onChangeText={(text) => setFormData({...formData, profissionalResponsavel: text})}
-                                placeholder="Nome do profissional"
-                            />
-                        </View>
-
-                        <Text style={styles.formLabel}>Observações:</Text>
-                        <TextInput
-                            style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
-                            value={formData.observacoes}
-                            onChangeText={(text) => setFormData({...formData, observacoes: text})}
-                            placeholder="Observações sobre as escalas aplicadas"
-                            multiline
-                        />
-                    </View>
                 </ScrollView>
             </KeyboardAvoidingView>
             
@@ -1080,38 +911,94 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         fontStyle: 'italic',
     },
-    formRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 15,
+    section: {
+        marginBottom: 20,
+        padding: 15,
+        backgroundColor: '#f8f9fa',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
     },
-    formLabel: {
-        fontSize: 14,
-        fontWeight: '600',
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
         color: '#495057',
-        width: '40%',
-        marginRight: 10,
+        marginBottom: 10,
     },
-    textInput: {
-        flex: 1,
+    picker: {
+        backgroundColor: '#fff',
+        borderRadius: 8,
         borderWidth: 1,
         borderColor: '#ced4da',
-        borderRadius: 8,
-        padding: 12,
-        fontSize: 14,
-        color: '#343a40',
-        backgroundColor: '#fff',
     },
-    generalInfoContainer: {
+    resultContainer: {
+        backgroundColor: '#e3f2fd',
+        padding: 15,
+        borderRadius: 8,
+        marginTop: 15,
+        borderWidth: 1,
+        borderColor: '#2196f3',
+    },
+    scoreText: {
+        fontSize: 14,
+        color: '#1976d2',
+        marginBottom: 5,
+    },
+    finalScore: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#1976d2',
+        textAlign: 'center',
+        marginBottom: 10,
+    },
+    interpretationText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#1976d2',
+        textAlign: 'center',
+    },
+    resultLabel: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#1976d2',
+        marginBottom: 10,
+    },
+    resultText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#1976d2',
+        textAlign: 'center',
+    },
+    option: {
         backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 20,
-        marginTop: 20,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        padding: 15,
+        marginBottom: 10,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ced4da',
+    },
+    selectedOption: {
+        backgroundColor: '#e3f2fd',
+        borderColor: '#2196f3',
+        borderWidth: 2,
+    },
+    optionText: {
+        fontSize: 14,
+        color: '#495057',
+    },
+    selectedText: {
+        color: '#1976d2',
+        fontWeight: 'bold',
+    },
+    result: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#1976d2',
+        textAlign: 'center',
+        marginTop: 15,
+        padding: 10,
+        backgroundColor: '#e3f2fd',
+        borderRadius: 8,
     },
     placeholderContent: {
         padding: 20,
