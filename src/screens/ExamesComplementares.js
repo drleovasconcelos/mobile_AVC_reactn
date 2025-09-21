@@ -20,17 +20,54 @@ import { useExamesComplementares } from '../context/ExamesComplementaresContext'
 const ExamesComplementares = ({ navigation, route }) => {
     const { paciente } = route.params;
     
+    // Debug: verificar se a tela está sendo renderizada
+    console.log('ExamesComplementares renderizada com paciente:', paciente);
+    
     // Hooks para acessar dados das outras telas
-    const { getAnamneseData } = useAnamnese();
-    const { getExameFisicoData } = useExameFisico();
-    const { salvarExamesComplementares, getExamesComplementaresData } = useExamesComplementares();
-    const { 
-        consolidarDadosAvaliacao, 
-        formatarDadosAnamnese,
-        formatarDadosExameFisico,
-        formatarDadosExamesComplementares,
-        salvarAvaliacaoConsolidada 
-    } = useAvaliacaoConsolidada();
+    let getAnamneseData, getExameFisicoData, salvarExamesComplementares, getExamesComplementaresData;
+    
+    try {
+        const anamneseContext = useAnamnese();
+        getAnamneseData = anamneseContext?.getAnamneseData || (() => ({}));
+    } catch (error) {
+        console.warn('Erro ao acessar contexto Anamnese:', error);
+        getAnamneseData = () => ({});
+    }
+    
+    try {
+        const exameFisicoContext = useExameFisico();
+        getExameFisicoData = exameFisicoContext?.getExameFisicoData || (() => ({}));
+    } catch (error) {
+        console.warn('Erro ao acessar contexto ExameFisico:', error);
+        getExameFisicoData = () => ({});
+    }
+    
+    try {
+        const examesComplementaresContext = useExamesComplementares();
+        salvarExamesComplementares = examesComplementaresContext?.salvarExamesComplementares || (() => {});
+        getExamesComplementaresData = examesComplementaresContext?.getExamesComplementaresData || (() => ({}));
+    } catch (error) {
+        console.warn('Erro ao acessar contexto ExamesComplementares:', error);
+        salvarExamesComplementares = () => {};
+        getExamesComplementaresData = () => ({});
+    }
+    let consolidarDadosAvaliacao, formatarDadosAnamnese, formatarDadosExameFisico, formatarDadosExamesComplementares, salvarAvaliacaoConsolidada;
+    
+    try {
+        const avaliacaoConsolidadaContext = useAvaliacaoConsolidada();
+        consolidarDadosAvaliacao = avaliacaoConsolidadaContext?.consolidarDadosAvaliacao || (() => ({}));
+        formatarDadosAnamnese = avaliacaoConsolidadaContext?.formatarDadosAnamnese || (() => '');
+        formatarDadosExameFisico = avaliacaoConsolidadaContext?.formatarDadosExameFisico || (() => '');
+        formatarDadosExamesComplementares = avaliacaoConsolidadaContext?.formatarDadosExamesComplementares || (() => '');
+        salvarAvaliacaoConsolidada = avaliacaoConsolidadaContext?.salvarAvaliacaoConsolidada || (() => {});
+    } catch (error) {
+        console.warn('Erro ao acessar contexto AvaliacaoConsolidada:', error);
+        consolidarDadosAvaliacao = () => ({});
+        formatarDadosAnamnese = () => '';
+        formatarDadosExameFisico = () => '';
+        formatarDadosExamesComplementares = () => '';
+        salvarAvaliacaoConsolidada = () => {};
+    }
     
     // Estado para controlar quais seções estão expandidas
     const [expandedSections, setExpandedSections] = useState({});

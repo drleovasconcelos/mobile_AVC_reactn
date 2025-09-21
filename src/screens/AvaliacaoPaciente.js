@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -19,7 +19,26 @@ import {
 } from '../services/AvaliacaoStorage';
 
 const AvaliacaoPaciente = ({ navigation, route }) => {
-    const { paciente } = route.params;
+    const { paciente } = route.params || {};
+    
+    console.log('AvaliacaoPaciente renderizada com paciente:', paciente);
+    
+    // Se não há paciente, mostrar mensagem de erro
+    if (!paciente) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <View style={styles.errorContainer}>
+                    <Text style={styles.errorText}>Paciente não encontrado</Text>
+                    <TouchableOpacity 
+                        style={styles.backButton}
+                        onPress={() => navigation.navigate('ListaPacientes')}
+                    >
+                        <Text style={styles.backButtonText}>Voltar para Lista</Text>
+                    </TouchableOpacity>
+                </View>
+            </SafeAreaView>
+        );
+    }
     
     // Estados para o sistema de persistência
     const [modalSalvarVisible, setModalSalvarVisible] = useState(false);
@@ -148,6 +167,8 @@ const AvaliacaoPaciente = ({ navigation, route }) => {
                         </Text>
                     </TouchableOpacity>
 
+                    <View style={styles.separator} />
+
                     <TouchableOpacity style={styles.menuButton} onPress={handleExamesFisicos}>
                         <Text style={styles.menuIcon}>👨‍⚕️</Text>
                         <Text style={styles.menuTitle}>Exames Físicos</Text>
@@ -155,6 +176,8 @@ const AvaliacaoPaciente = ({ navigation, route }) => {
                             Exame físico geral e avaliações específicas
                         </Text>
                     </TouchableOpacity>
+
+                    <View style={styles.separator} />
 
                     <TouchableOpacity style={styles.menuButton} onPress={handleExamesComplementares}>
                         <Text style={styles.menuIcon}>🔬</Text>
@@ -164,6 +187,8 @@ const AvaliacaoPaciente = ({ navigation, route }) => {
                         </Text>
                     </TouchableOpacity>
 
+                    <View style={styles.separator} />
+
                     <TouchableOpacity style={styles.menuButton} onPress={handleEscalasHospitalares}>
                         <Text style={styles.menuIcon}>📏</Text>
                         <Text style={styles.menuTitle}>Escalas Hospitalares</Text>
@@ -171,6 +196,8 @@ const AvaliacaoPaciente = ({ navigation, route }) => {
                             Escalas de avaliação e monitoramento hospitalar
                         </Text>
                     </TouchableOpacity>
+
+                    <View style={styles.separator} />
 
                     <TouchableOpacity style={styles.menuButton} onPress={handleDashboard}>
                         <Text style={styles.menuIcon}>📊</Text>
@@ -314,6 +341,35 @@ const styles = StyleSheet.create({
         color: '#6c757d',
         textAlign: 'center',
         lineHeight: 20,
+    },
+    separator: {
+        height: 1,
+        backgroundColor: '#e9ecef',
+        marginVertical: 15,
+        marginHorizontal: 20,
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    errorText: {
+        fontSize: 18,
+        color: '#dc3545',
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    backButton: {
+        backgroundColor: '#007bff',
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        borderRadius: 8,
+    },
+    backButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
 

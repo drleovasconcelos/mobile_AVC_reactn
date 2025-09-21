@@ -1,6 +1,32 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 const STORAGE_KEY = 'avaliacoes_fisioterapeuticas';
+
+// Wrapper para storage que funciona em ambas as plataformas
+const Storage = {
+    async getItem(key) {
+        if (Platform.OS === 'web') {
+            return localStorage.getItem(key);
+        } else {
+            return await AsyncStorage.getItem(key);
+        }
+    },
+    async setItem(key, value) {
+        if (Platform.OS === 'web') {
+            localStorage.setItem(key, value);
+        } else {
+            await AsyncStorage.setItem(key, value);
+        }
+    },
+    async removeItem(key) {
+        if (Platform.OS === 'web') {
+            localStorage.removeItem(key);
+        } else {
+            await AsyncStorage.removeItem(key);
+        }
+    }
+};
 
 // Estrutura de dados para uma avaliação
 export const createAvaliacaoData = (formData, nomeAvaliacao, pontuacaoTotal, statusGeral, paciente) => {
@@ -24,7 +50,7 @@ export const salvarAvaliacao = async (avaliacaoData) => {
         const avaliacoesExistentes = await buscarTodasAvaliacoes();
         const novasAvaliacoes = [...avaliacoesExistentes, avaliacaoData];
         
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(novasAvaliacoes));
+        await Storage.setItem(STORAGE_KEY, JSON.stringify(novasAvaliacoes));
         return { success: true, message: 'Avaliação salva com sucesso!' };
     } catch (error) {
         console.error('Erro ao salvar avaliação:', error);
@@ -35,7 +61,7 @@ export const salvarAvaliacao = async (avaliacaoData) => {
 // Buscar todas as avaliações
 export const buscarTodasAvaliacoes = async () => {
     try {
-        const avaliacoes = await AsyncStorage.getItem(STORAGE_KEY);
+        const avaliacoes = await Storage.getItem(STORAGE_KEY);
         return avaliacoes ? JSON.parse(avaliacoes) : [];
     } catch (error) {
         console.error('Erro ao buscar avaliações:', error);
@@ -76,7 +102,7 @@ export const deletarAvaliacao = async (id) => {
         const avaliacoes = await buscarTodasAvaliacoes();
         const avaliacoesFiltradas = avaliacoes.filter(avaliacao => avaliacao.id !== id);
         
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(avaliacoesFiltradas));
+        await Storage.setItem(STORAGE_KEY, JSON.stringify(avaliacoesFiltradas));
         return { success: true, message: 'Avaliação deletada com sucesso!' };
     } catch (error) {
         console.error('Erro ao deletar avaliação:', error);
@@ -92,7 +118,7 @@ export const atualizarAvaliacao = async (id, dadosAtualizados) => {
         
         if (indice !== -1) {
             avaliacoes[indice] = { ...avaliacoes[indice], ...dadosAtualizados };
-            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(avaliacoes));
+            await Storage.setItem(STORAGE_KEY, JSON.stringify(avaliacoes));
             return { success: true, message: 'Avaliação atualizada com sucesso!' };
         }
         
@@ -106,7 +132,7 @@ export const atualizarAvaliacao = async (id, dadosAtualizados) => {
 // Limpar todas as avaliações (para desenvolvimento/teste)
 export const limparTodasAvaliacoes = async () => {
     try {
-        await AsyncStorage.removeItem(STORAGE_KEY);
+        await Storage.removeItem(STORAGE_KEY);
         return { success: true, message: 'Todas as avaliações foram removidas.' };
     } catch (error) {
         console.error('Erro ao limpar avaliações:', error);

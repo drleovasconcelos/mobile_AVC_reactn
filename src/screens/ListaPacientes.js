@@ -7,7 +7,8 @@ import {
     TouchableOpacity, 
     TextInput, 
     Alert,
-    SafeAreaView 
+    SafeAreaView,
+    Platform
 } from 'react-native';
 import { usePacientes } from '../context/PacientesContext';
 import { useAuth } from '../context/AuthContext';
@@ -18,37 +19,79 @@ const ListaPacientes = ({ navigation }) => {
     const { logout, currentUser } = useAuth();
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredPacientes, setFilteredPacientes] = useState(pacientes);
+    const [screenData, setScreenData] = useState(() => {
+        if (Platform.OS === 'web') {
+            return {
+                width: typeof window !== 'undefined' ? window.innerWidth : 375,
+                height: typeof window !== 'undefined' ? window.innerHeight : 667
+            };
+        } else {
+            try {
+                const { Dimensions } = require('react-native');
+                return Dimensions.get('window');
+            } catch (error) {
+                return { width: 375, height: 667 };
+            }
+        }
+    });
 
     // Atualizar lista filtrada quando pacientes ou termo de busca mudar
     useEffect(() => {
         setFilteredPacientes(buscarPacientes(searchTerm));
     }, [searchTerm, pacientes, buscarPacientes]);
 
+    // Debug: monitorar mudanças na navegação
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('state', (e) => {
+            console.log('ListaPacientes - Navigation state changed:', e.data.state);
+        });
+        return unsubscribe;
+    }, [navigation]);
+
+    // Monitorar mudanças de dimensões da tela
+    useEffect(() => {
+        if (Platform.OS === 'web') {
+            const handleResize = () => {
+                setScreenData({
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                });
+            };
+
+            window.addEventListener('resize', handleResize);
+            
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+        } else {
+            try {
+                const { Dimensions } = require('react-native');
+                const subscription = Dimensions.addEventListener('change', ({ window }) => {
+                    setScreenData(window);
+                });
+                
+                return () => subscription?.remove();
+            } catch (error) {
+                console.warn('Erro ao configurar listener de dimensões:', error);
+            }
+        }
+    }, []);
+
     // Removido handleLogout pois agora está no Footer
 
     const handlePacientePress = (paciente) => {
-        Alert.alert(
-            'Detalhes do Paciente',
-            `Nome: ${paciente.nome}\nProntuário: ${paciente.prontuario}\nData de Admissão: ${paciente.dataAdmissao}\nDiagnóstico: ${paciente.diagnostico}\nStatus: ${paciente.status}`,
-            [
-                { 
-                    text: 'Avaliação do Paciente', 
-                    onPress: () => navigation.navigate('AvaliacaoPaciente', { paciente }) 
-                },
-                { text: 'Editar', onPress: () => console.log('Editar paciente:', paciente.id) },
-                { 
-                    text: 'Buscar Avaliação', 
-                    onPress: () => navigation.navigate('BuscarAvaliacao', { paciente }) 
-                },
-                { text: 'Fechar', style: 'cancel' }
-            ]
-        );
+        console.log('Clicou no paciente:', paciente.nome);
+        
+        // Navegação simples e direta
+        navigation.navigate('AvaliacaoPaciente', { paciente });
     };
 
     const renderPaciente = ({ item }) => (
         <TouchableOpacity 
-            style={styles.pacienteCard}
+            style={dynamicStyles.pacienteCard}
             onPress={() => handlePacientePress(item)}
+            activeOpacity={0.7}
+            delayPressIn={0}
         >
             <View style={styles.pacienteHeader}>
                 <Text style={styles.pacienteNome}>{item.nome}</Text>
@@ -74,9 +117,41 @@ const ListaPacientes = ({ navigation }) => {
         </TouchableOpacity>
     );
 
+    // Estilos dinâmicos baseados nas dimensões da tela
+    const dynamicStyles = StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: '#f8f9fa',
+            width: screenData.width,
+            height: screenData.height,
+        },
+        header: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: screenData.width < 768 ? 15 : 20,
+            paddingTop: screenData.width < 768 ? 40 : 50,
+            paddingBottom: 20,
+            backgroundColor: '#007bff',
+        },
+        pacienteCard: {
+            backgroundColor: '#fff',
+            borderRadius: 10,
+            padding: screenData.width < 768 ? 12 : 15,
+            marginBottom: 10,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 2,
+            width: '100%',
+            maxWidth: screenData.width - 40,
+        },
+    });
+
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
+        <SafeAreaView style={dynamicStyles.container}>
+            <View style={dynamicStyles.header}>
                 <View style={styles.headerLeft}>
                     <Text style={styles.headerTitle}>Lista de Pacientes</Text>
                     {currentUser && (
@@ -85,12 +160,29 @@ const ListaPacientes = ({ navigation }) => {
                         </Text>
                     )}
                 </View>
-                <TouchableOpacity 
-                    style={styles.addButton}
-                    onPress={() => navigation.navigate('Cadastro')}
-                >
-                    <Text style={styles.addButtonText}>+</Text>
-                </TouchableOpacity>
+                <View style={styles.headerButtons}>
+                    <TouchableOpacity 
+                        style={[styles.addButton, { marginRight: 10 }]}
+                        onPress={() => {
+                            console.log('Teste de navegação direta');
+                            navigation.navigate('AvaliacaoPaciente', { 
+                                paciente: { 
+                                    id: 'teste', 
+                                    nome: 'Paciente Teste', 
+                                    prontuario: '999' 
+                                } 
+                            });
+                        }}
+                    >
+                        <Text style={styles.addButtonText}>🧪</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        style={styles.addButton}
+                        onPress={() => navigation.navigate('Cadastro')}
+                    >
+                        <Text style={styles.addButtonText}>+</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
 
             <View style={styles.searchContainer}>
@@ -125,8 +217,14 @@ const ListaPacientes = ({ navigation }) => {
                 data={filteredPacientes}
                 renderItem={renderPaciente}
                 keyExtractor={item => item.id}
-                style={styles.lista}
+                style={[styles.lista, { width: screenData.width }]}
                 showsVerticalScrollIndicator={false}
+                removeClippedSubviews={false}
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{
+                    paddingHorizontal: screenData.width < 768 ? 15 : 20,
+                    paddingBottom: 100,
+                }}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         <Text style={styles.emptyText}>
@@ -157,6 +255,10 @@ const styles = StyleSheet.create({
     },
     headerLeft: {
         flex: 1,
+    },
+    headerButtons: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     headerTitle: {
         color: '#fff',

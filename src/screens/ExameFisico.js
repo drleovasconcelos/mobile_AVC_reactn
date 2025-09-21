@@ -78,6 +78,8 @@ const ExameFisico = ({ navigation, route }) => {
         peso: '',
         imc: '',
         classificacaoIMC: '',
+        classeObesidadeIMC: '',
+        statusSinaisVitais: 0,
         
         // Seção 4-5: Exames Fisioterapêuticos
         inspecaoPostural: [],
@@ -274,17 +276,35 @@ const ExameFisico = ({ navigation, route }) => {
             const alturaM = altura / 100;
             const imc = peso / (alturaM * alturaM);
             let classificacao = '';
+            let classeObesidade = '';
             
-            if (imc < 18.5) classificacao = 'Abaixo do peso';
-            else if (imc < 25) classificacao = 'Peso normal';
-            else if (imc < 30) classificacao = 'Sobrepeso';
-            else if (imc < 35) classificacao = 'Obesidade Grau I';
-            else if (imc < 40) classificacao = 'Obesidade Grau II';
-            else classificacao = 'Obesidade Grau III';
+            if (imc < 18.5) {
+                classificacao = 'Baixo peso';
+                classeObesidade = '-';
+            } else if (imc >= 18.5 && imc <= 24.9) {
+                classificacao = 'Normal';
+                classeObesidade = '-';
+            } else if (imc >= 25.0 && imc <= 29.9) {
+                classificacao = 'Sobrepeso';
+                classeObesidade = '-';
+            } else if (imc >= 30.0 && imc <= 34.9) {
+                classificacao = 'Obesidade Grau I';
+                classeObesidade = 'Grau I';
+            } else if (imc >= 35.0 && imc <= 39.9) {
+                classificacao = 'Obesidade Grau II';
+                classeObesidade = 'Grau II';
+            } else if (imc >= 40.0) {
+                classificacao = 'Obesidade Grau III';
+                classeObesidade = 'Grau III';
+            }
             
-            return { imc: imc.toFixed(1), classificacao };
+            return { 
+                imc: imc.toFixed(1), 
+                classificacao,
+                classeObesidade
+            };
         }
-        return { imc: '', classificacao: '' };
+        return { imc: '', classificacao: '', classeObesidade: '' };
     };
 
     // Função para atualizar peso e altura e calcular IMC automaticamente
@@ -298,6 +318,7 @@ const ExameFisico = ({ navigation, route }) => {
             );
             newFormData.imc = resultado.imc;
             newFormData.classificacaoIMC = resultado.classificacao;
+            newFormData.classeObesidadeIMC = resultado.classeObesidade;
         }
         
         setFormData(newFormData);
@@ -457,7 +478,7 @@ const ExameFisico = ({ navigation, route }) => {
             { nome: 'Histórico Funcional', pontuacao: formData.statusHistorico || 0 },
             { nome: 'Impressão Geral', pontuacao: formData.statusImpressao || 0 },
             { nome: 'Avaliação da Dor', pontuacao: (formData.statusLocalizacao || 0) + (formData.statusTipoDor || 0) + (formData.statusIntensidadeDor || 0) + (formData.statusFrequenciaDuracao || 0) + (formData.statusIrradiacao || 0) },
-            { nome: 'Sinais Vitais', pontuacao: 0 }, // Não tem status específico
+            { nome: 'Sinais Vitais', pontuacao: formData.statusSinaisVitais || 0 },
             { nome: 'Exames Fisioterapêuticos', pontuacao: (formData.statusInspecao || 0) + (formData.statusPalpacao || 0) + (formData.statusAmplitude || 0) + (formData.statusForca || 0) + (formData.statusTonusMuscular || 0) + (formData.statusCoordenacao || 0) + (formData.statusEquilibrio || 0) + (formData.statusReflexosSuperiores || 0) + (formData.statusReflexosInferiores || 0) + (formData.statusReflexosPatologicosExame || 0) + (formData.statusManobrasDeficitarias || 0) + (formData.statusMarcha || 0) + (formData.statusSensibilidadeSuperficial || 0) + (formData.statusSensibilidadeProfunda || 0) },
             { nome: 'Avaliação Respiratória', pontuacao: (formData.statusInspecaoToracica || 0) + (formData.statusPalpacaoRespiratoria || 0) + (formData.statusAuscultaRespiratoria || 0) + (formData.statusPercussao || 0) + (formData.statusParametrosResp || 0) + (formData.statusObservacoesClinicas || 0) + (formData.statusVentilacaoMecanica || 0) },
             { nome: 'Avaliação dos Sistemas', pontuacao: (formData.statusSistemaRespiratorio || 0) + (formData.statusSistemaCardiovascular || 0) + (formData.statusSistemaGastrointestinal || 0) + (formData.statusSistemaNeurologico || 0) + (formData.statusSistemaGeniturinario || 0) + (formData.statusSistemaMusculoesqueletico || 0) + (formData.statusSistemaDermatologico || 0) },
@@ -857,9 +878,68 @@ const ExameFisico = ({ navigation, route }) => {
                         </View>
 
                         <View style={styles.formRow}>
-                            <Text style={styles.formLabel}>IMC: {formData.imc}</Text>
-                            <Text style={styles.classificacaoIMC}>Classificação: {formData.classificacaoIMC}</Text>
+                            <Text style={styles.formLabel}>IMC: {formData.imc} kg/m²</Text>
                         </View>
+
+                        <View style={styles.imcContainer}>
+                            <Text style={styles.imcTableTitle}>Classificação do IMC:</Text>
+                            <View style={styles.imcTable}>
+                                <View style={styles.imcTableHeader}>
+                                    <Text style={styles.imcTableHeaderText}>Classificação</Text>
+                                    <Text style={styles.imcTableHeaderText}>IMC (kg/m²)</Text>
+                                    <Text style={styles.imcTableHeaderText}>Classe de obesidade</Text>
+                                </View>
+                                
+                                <View style={[styles.imcTableRow, formData.classificacaoIMC === 'Baixo peso' && styles.imcTableRowSelected]}>
+                                    <Text style={[styles.imcTableRowText, formData.classificacaoIMC === 'Baixo peso' && styles.imcTableRowTextSelected]}>Baixo peso</Text>
+                                    <Text style={[styles.imcTableRowText, formData.classificacaoIMC === 'Baixo peso' && styles.imcTableRowTextSelected]}>{"< 18,5"}</Text>
+                                    <Text style={[styles.imcTableRowText, formData.classificacaoIMC === 'Baixo peso' && styles.imcTableRowTextSelected]}>-</Text>
+                                </View>
+                                
+                                <View style={[styles.imcTableRow, formData.classificacaoIMC === 'Normal' && styles.imcTableRowSelected]}>
+                                    <Text style={[styles.imcTableRowText, formData.classificacaoIMC === 'Normal' && styles.imcTableRowTextSelected]}>Normal</Text>
+                                    <Text style={[styles.imcTableRowText, formData.classificacaoIMC === 'Normal' && styles.imcTableRowTextSelected]}>18,5 - 24,9</Text>
+                                    <Text style={[styles.imcTableRowText, formData.classificacaoIMC === 'Normal' && styles.imcTableRowTextSelected]}>-</Text>
+                                </View>
+                                
+                                <View style={[styles.imcTableRow, formData.classificacaoIMC === 'Sobrepeso' && styles.imcTableRowSelected]}>
+                                    <Text style={[styles.imcTableRowText, formData.classificacaoIMC === 'Sobrepeso' && styles.imcTableRowTextSelected]}>Sobrepeso</Text>
+                                    <Text style={[styles.imcTableRowText, formData.classificacaoIMC === 'Sobrepeso' && styles.imcTableRowTextSelected]}>25,0 - 29,9</Text>
+                                    <Text style={[styles.imcTableRowText, formData.classificacaoIMC === 'Sobrepeso' && styles.imcTableRowTextSelected]}>-</Text>
+                                </View>
+                                
+                                <View style={[styles.imcTableRow, formData.classificacaoIMC === 'Obesidade Grau I' && styles.imcTableRowSelected]}>
+                                    <Text style={[styles.imcTableRowText, formData.classificacaoIMC === 'Obesidade Grau I' && styles.imcTableRowTextSelected]}>Obesidade Grau I</Text>
+                                    <Text style={[styles.imcTableRowText, formData.classificacaoIMC === 'Obesidade Grau I' && styles.imcTableRowTextSelected]}>30,0 - 34,9</Text>
+                                    <Text style={[styles.imcTableRowText, formData.classificacaoIMC === 'Obesidade Grau I' && styles.imcTableRowTextSelected]}>Grau I</Text>
+                                </View>
+                                
+                                <View style={[styles.imcTableRow, formData.classificacaoIMC === 'Obesidade Grau II' && styles.imcTableRowSelected]}>
+                                    <Text style={[styles.imcTableRowText, formData.classificacaoIMC === 'Obesidade Grau II' && styles.imcTableRowTextSelected]}>Obesidade Grau II</Text>
+                                    <Text style={[styles.imcTableRowText, formData.classificacaoIMC === 'Obesidade Grau II' && styles.imcTableRowTextSelected]}>35,0 - 39,9</Text>
+                                    <Text style={[styles.imcTableRowText, formData.classificacaoIMC === 'Obesidade Grau II' && styles.imcTableRowTextSelected]}>Grau II</Text>
+                                </View>
+                                
+                                <View style={[styles.imcTableRow, formData.classificacaoIMC === 'Obesidade Grau III' && styles.imcTableRowSelected]}>
+                                    <Text style={[styles.imcTableRowText, formData.classificacaoIMC === 'Obesidade Grau III' && styles.imcTableRowTextSelected]}>Obesidade Grau III</Text>
+                                    <Text style={[styles.imcTableRowText, formData.classificacaoIMC === 'Obesidade Grau III' && styles.imcTableRowTextSelected]}>{" > 40,0"}</Text>
+                                    <Text style={[styles.imcTableRowText, formData.classificacaoIMC === 'Obesidade Grau III' && styles.imcTableRowTextSelected]}>Grau III</Text>
+                                </View>
+                            </View>
+                            
+                            {formData.classificacaoIMC && (
+                                <View style={styles.imcResult}>
+                                    <Text style={styles.imcResultText}>
+                                        ✅ Classificação atual: <Text style={styles.imcResultBold}>{formData.classificacaoIMC}</Text>
+                                        {formData.classeObesidadeIMC !== '-' && (
+                                            <Text> ({formData.classeObesidadeIMC})</Text>
+                                        )}
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
+
+                        {renderStatusButtons('statusSinaisVitais')}
                     </View>
                 );
 
@@ -1463,8 +1543,6 @@ const ExameFisico = ({ navigation, route }) => {
                         {renderStatusButtons('statusObservacoesClinicas')}
 
                         <Text style={styles.sectionSubtitle}>Ventilação Mecânica (VNI/VMI)</Text>
-                        
-                        {renderStatusButtons('statusVentilacaoMecanica')}
 
                         <Text style={styles.formLabel}>🔹 Tipo de Interface:</Text>
                         <View style={styles.checkboxGroup}>
@@ -1644,6 +1722,8 @@ const ExameFisico = ({ navigation, route }) => {
                             onChangeText={(text) => setFormData({...formData, observacoesAspiracao: text})}
                             multiline
                         />
+
+                        {renderStatusButtons('statusVentilacaoMecanica')}
                     </View>
                 );
 
@@ -2483,6 +2563,77 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         color: '#007bff',
         marginTop: 4,
+    },
+    imcContainer: {
+        marginTop: 15,
+        padding: 15,
+        backgroundColor: '#f8f9fa',
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
+    },
+    imcTableTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#343a40',
+        marginBottom: 10,
+        textAlign: 'center',
+    },
+    imcTable: {
+        borderWidth: 1,
+        borderColor: '#dee2e6',
+        borderRadius: 8,
+        overflow: 'hidden',
+    },
+    imcTableHeader: {
+        flexDirection: 'row',
+        backgroundColor: '#007bff',
+        paddingVertical: 10,
+        paddingHorizontal: 8,
+    },
+    imcTableHeaderText: {
+        flex: 1,
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 12,
+        textAlign: 'center',
+    },
+    imcTableRow: {
+        flexDirection: 'row',
+        backgroundColor: '#fff',
+        paddingVertical: 8,
+        paddingHorizontal: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#e9ecef',
+    },
+    imcTableRowSelected: {
+        backgroundColor: '#e3f2fd',
+    },
+    imcTableRowText: {
+        flex: 1,
+        color: '#495057',
+        fontSize: 12,
+        textAlign: 'center',
+    },
+    imcTableRowTextSelected: {
+        color: '#007bff',
+        fontWeight: 'bold',
+    },
+    imcResult: {
+        marginTop: 15,
+        padding: 10,
+        backgroundColor: '#d4edda',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#c3e6cb',
+    },
+    imcResultText: {
+        fontSize: 14,
+        color: '#155724',
+        textAlign: 'center',
+    },
+    imcResultBold: {
+        fontWeight: 'bold',
     },
     tableContainer: {
         marginVertical: 15,

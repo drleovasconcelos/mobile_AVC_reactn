@@ -20,6 +20,9 @@ const Footer = ({ navigation, currentScreen }) => {
     const handleVoltar = () => {
         if (navigation.canGoBack()) {
             navigation.goBack();
+        } else {
+            // Se não pode voltar, navegar para ListaPacientes
+            navigation.navigate('ListaPacientes');
         }
     };
 

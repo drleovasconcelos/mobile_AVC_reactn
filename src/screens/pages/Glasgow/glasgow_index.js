@@ -2,9 +2,46 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, Button } from 'react-native';
 import styles from './glasgow_style'; // ✅ Importando os estilos
 import { Picker } from '@react-native-picker/picker';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+
+// Componente Picker unificado que funciona em ambas as plataformas
+const UnifiedPicker = ({ selectedValue, onValueChange, children, style }) => {
+    if (Platform.OS === 'web') {
+        return (
+            <select 
+                value={selectedValue} 
+                onChange={(e) => onValueChange(parseInt(e.target.value))}
+                style={{
+                    width: '100%',
+                    padding: '10px',
+                    fontSize: '16px',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    backgroundColor: '#fff',
+                    ...style
+                }}
+            >
+                {children.map((item, index) => (
+                    <option key={index} value={item.props.value}>
+                        {item.props.label}
+                    </option>
+                ))}
+            </select>
+        );
+    } else {
+        return (
+            <UnifiedPicker
+                selectedValue={selectedValue}
+                onValueChange={onValueChange}
+                style={style}
+            >
+                {children}
+            </UnifiedPicker>
+        );
+    }
+};
 
 
 export default function GlasgowComaScaleApp( navigation ) {
@@ -72,52 +109,52 @@ const totalScore = baseScore + Number(pupilResponse);
       {/* Seção de Resposta Ocular */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Abertura Ocular (E)</Text>
-        <Picker
+        <UnifiedPicker
           selectedValue={eyeResponse}
           onValueChange={(itemValue) => setEyeResponse(itemValue)}
           style={styles.picker}
         >
-          <Picker.Item label="4 - Abertura espontânea" value={4} />
-          <Picker.Item label="3 - Ao estímulo verbal" value={3} />
-          <Picker.Item label="2 - À pressão" value={2} />
-          <Picker.Item label="1 - Nenhuma" value={1} />
-          <Picker.Item label="NT - Não Testável" value={0} />
-        </Picker>
+          <UnifiedPicker.Item label="4 - Abertura espontânea" value={4} />
+          <UnifiedPicker.Item label="3 - Ao estímulo verbal" value={3} />
+          <UnifiedPicker.Item label="2 - À pressão" value={2} />
+          <UnifiedPicker.Item label="1 - Nenhuma" value={1} />
+          <UnifiedPicker.Item label="NT - Não Testável" value={0} />
+        </UnifiedPicker>
       </View>
 
       {/* Seção de Resposta Verbal */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Resposta Verbal (V)</Text>
-        <Picker
+        <UnifiedPicker
           selectedValue={verbalResponse}
           onValueChange={(itemValue) => setVerbalResponse(itemValue)}
           style={styles.picker}
         >
-          <Picker.Item label="5 - Orientado" value={5} />
-          <Picker.Item label="4 - Confuso" value={4} />
-          <Picker.Item label="3 - Palavras" value={3} />
-          <Picker.Item label="2 - Sons" value={2} />
-          <Picker.Item label="1 - Nenhuma" value={1} />
-          <Picker.Item label="NT - Não Testável" value={0} />
-        </Picker>
+          <UnifiedPicker.Item label="5 - Orientado" value={5} />
+          <UnifiedPicker.Item label="4 - Confuso" value={4} />
+          <UnifiedPicker.Item label="3 - Palavras" value={3} />
+          <UnifiedPicker.Item label="2 - Sons" value={2} />
+          <UnifiedPicker.Item label="1 - Nenhuma" value={1} />
+          <UnifiedPicker.Item label="NT - Não Testável" value={0} />
+        </UnifiedPicker>
       </View>
 
       {/* Seção de Resposta Motora */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Resposta Motora (M)</Text>
-        <Picker
+        <UnifiedPicker
           selectedValue={motorResponse}
           onValueChange={(itemValue) => setMotorResponse(itemValue)}
           style={styles.picker}
         >
-          <Picker.Item label="6 - Obedece comandos" value={6} />
-          <Picker.Item label="5 - Localizado" value={5} />
-          <Picker.Item label="4 - Flexão normal" value={4} />
-          <Picker.Item label="3 - Flexão anormal" value={3} />
-          <Picker.Item label="2 - Extensão" value={2} />
-          <Picker.Item label="1 - Nenhuma" value={1} />
-          <Picker.Item label="NT - Não Testável" value={0} />
-        </Picker>
+          <UnifiedPicker.Item label="6 - Obedece comandos" value={6} />
+          <UnifiedPicker.Item label="5 - Localizado" value={5} />
+          <UnifiedPicker.Item label="4 - Flexão normal" value={4} />
+          <UnifiedPicker.Item label="3 - Flexão anormal" value={3} />
+          <UnifiedPicker.Item label="2 - Extensão" value={2} />
+          <UnifiedPicker.Item label="1 - Nenhuma" value={1} />
+          <UnifiedPicker.Item label="NT - Não Testável" value={0} />
+        </UnifiedPicker>
       </View>
 
       {/* Seção de Resposta Pupilar (SUBTRAI pontos) */}
@@ -126,15 +163,15 @@ const totalScore = baseScore + Number(pupilResponse);
         <Text style={{ color: '#d32f2f', marginBottom: 8 }}>
           ⚠️ Subtrai do score total!
         </Text>
-        <Picker
+        <UnifiedPicker
           selectedValue={pupilResponse}
           onValueChange={(itemValue) => setPupilResponse(itemValue)}
           style={styles.picker}
         >
-          <Picker.Item label="0 - Ambas pupilas reagem" value={0} />
-          <Picker.Item label="-1 - Apenas uma pupila reage" value={-1} />
-          <Picker.Item label="-2 - Nenhuma pupila reage" value={-2} />
-        </Picker>
+          <UnifiedPicker.Item label="0 - Ambas pupilas reagem" value={0} />
+          <UnifiedPicker.Item label="-1 - Apenas uma pupila reage" value={-1} />
+          <UnifiedPicker.Item label="-2 - Nenhuma pupila reage" value={-2} />
+        </UnifiedPicker>
       </View>
 
       {/* Resultado */}

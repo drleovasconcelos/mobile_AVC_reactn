@@ -10,9 +10,64 @@ import {
     Platform,
     Alert
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
+// Import condicional do Picker apenas para mobile
+let Picker = null;
+if (Platform.OS !== 'web') {
+    try {
+        Picker = require('@react-native-picker/picker').Picker;
+    } catch (error) {
+        console.warn('Picker não disponível:', error);
+    }
+}
+
+// Componente Picker unificado que funciona em ambas as plataformas
+const UnifiedPicker = ({ selectedValue, onValueChange, children, style }) => {
+    if (Platform.OS === 'web') {
+        return (
+            <select 
+                value={selectedValue} 
+                onChange={(e) => onValueChange(parseInt(e.target.value))}
+                style={{
+                    width: '100%',
+                    padding: '10px',
+                    fontSize: '16px',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    backgroundColor: '#fff',
+                    ...style
+                }}
+            >
+                {children.map((item, index) => (
+                    <option key={index} value={item.props.value}>
+                        {item.props.label}
+                    </option>
+                ))}
+            </select>
+        );
+    } else if (Picker) {
+        return (
+            <Picker
+                selectedValue={selectedValue}
+                onValueChange={onValueChange}
+                style={style}
+            >
+                {children}
+            </Picker>
+        );
+    }
+    return null;
+};
+// Import condicional dos módulos Expo apenas para mobile
+let Print = null;
+let Sharing = null;
+if (Platform.OS !== 'web') {
+    try {
+        Print = require('expo-print');
+        Sharing = require('expo-sharing');
+    } catch (error) {
+        console.warn('Módulos Expo não disponíveis:', error);
+    }
+}
 import Footer from '../components/Footer';
 
 const EscalasHospitalares = ({ navigation, route }) => {
@@ -247,50 +302,50 @@ const EscalasHospitalares = ({ navigation, route }) => {
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Abertura Ocular (E)</Text>
-                            <Picker
+                            <UnifiedPicker
                                 selectedValue={eyeResponse}
                                 onValueChange={(itemValue) => setEyeResponse(itemValue)}
                                 style={styles.picker}
                             >
-                                <Picker.Item label="4 - Abertura espontânea" value={4} />
-                                <Picker.Item label="3 - Ao estímulo verbal" value={3} />
-                                <Picker.Item label="2 - À pressão" value={2} />
-                                <Picker.Item label="1 - Nenhuma" value={1} />
-                                <Picker.Item label="NT - Não Testável" value={0} />
-                            </Picker>
+                                <UnifiedPicker.Item label="4 - Abertura espontânea" value={4} />
+                                <UnifiedPicker.Item label="3 - Ao estímulo verbal" value={3} />
+                                <UnifiedPicker.Item label="2 - À pressão" value={2} />
+                                <UnifiedPicker.Item label="1 - Nenhuma" value={1} />
+                                <UnifiedPicker.Item label="NT - Não Testável" value={0} />
+                            </UnifiedPicker>
                         </View>
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Resposta Verbal (V)</Text>
-                            <Picker
+                            <UnifiedPicker
                                 selectedValue={verbalResponse}
                                 onValueChange={(itemValue) => setVerbalResponse(itemValue)}
                                 style={styles.picker}
                             >
-                                <Picker.Item label="5 - Orientado" value={5} />
-                                <Picker.Item label="4 - Confuso" value={4} />
-                                <Picker.Item label="3 - Palavras" value={3} />
-                                <Picker.Item label="2 - Sons" value={2} />
-                                <Picker.Item label="1 - Nenhuma" value={1} />
-                                <Picker.Item label="NT - Não Testável" value={0} />
-                            </Picker>
+                                <UnifiedPicker.Item label="5 - Orientado" value={5} />
+                                <UnifiedPicker.Item label="4 - Confuso" value={4} />
+                                <UnifiedPicker.Item label="3 - Palavras" value={3} />
+                                <UnifiedPicker.Item label="2 - Sons" value={2} />
+                                <UnifiedPicker.Item label="1 - Nenhuma" value={1} />
+                                <UnifiedPicker.Item label="NT - Não Testável" value={0} />
+                            </UnifiedPicker>
                         </View>
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Resposta Motora (M)</Text>
-                            <Picker
+                            <UnifiedPicker
                                 selectedValue={motorResponse}
                                 onValueChange={(itemValue) => setMotorResponse(itemValue)}
                                 style={styles.picker}
                             >
-                                <Picker.Item label="6 - Obedece comandos" value={6} />
-                                <Picker.Item label="5 - Localizado" value={5} />
-                                <Picker.Item label="4 - Flexão normal" value={4} />
-                                <Picker.Item label="3 - Flexão anormal" value={3} />
-                                <Picker.Item label="2 - Extensão" value={2} />
-                                <Picker.Item label="1 - Nenhuma" value={1} />
-                                <Picker.Item label="NT - Não Testável" value={0} />
-                            </Picker>
+                                <UnifiedPicker.Item label="6 - Obedece comandos" value={6} />
+                                <UnifiedPicker.Item label="5 - Localizado" value={5} />
+                                <UnifiedPicker.Item label="4 - Flexão normal" value={4} />
+                                <UnifiedPicker.Item label="3 - Flexão anormal" value={3} />
+                                <UnifiedPicker.Item label="2 - Extensão" value={2} />
+                                <UnifiedPicker.Item label="1 - Nenhuma" value={1} />
+                                <UnifiedPicker.Item label="NT - Não Testável" value={0} />
+                            </UnifiedPicker>
                         </View>
 
                         <View style={[styles.section, { backgroundColor: '#fff8e1' }]}>
@@ -298,15 +353,15 @@ const EscalasHospitalares = ({ navigation, route }) => {
                             <Text style={{ color: '#d32f2f', marginBottom: 8 }}>
                                 ⚠️ Subtrai do score total!
                             </Text>
-                            <Picker
+                            <UnifiedPicker
                                 selectedValue={pupilResponse}
                                 onValueChange={(itemValue) => setPupilResponse(itemValue)}
                                 style={styles.picker}
                             >
-                                <Picker.Item label="0 - Ambas pupilas reagem" value={0} />
-                                <Picker.Item label="-1 - Apenas uma pupila reage" value={-1} />
-                                <Picker.Item label="-2 - Nenhuma pupila reage" value={-2} />
-                            </Picker>
+                                <UnifiedPicker.Item label="0 - Ambas pupilas reagem" value={0} />
+                                <UnifiedPicker.Item label="-1 - Apenas uma pupila reage" value={-1} />
+                                <UnifiedPicker.Item label="-2 - Nenhuma pupila reage" value={-2} />
+                            </UnifiedPicker>
                         </View>
 
                         <View style={styles.resultContainer}>
@@ -337,22 +392,22 @@ const EscalasHospitalares = ({ navigation, route }) => {
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Nível de Agitação/Sedação</Text>
-                            <Picker
+                            <UnifiedPicker
                                 selectedValue={rassScore}
                                 onValueChange={(itemValue) => setRassScore(itemValue)}
                                 style={styles.picker}
                             >
-                                <Picker.Item label="+4 - Combativo" value={+4} />
-                                <Picker.Item label="+3 - Muito agitado" value={+3} />
-                                <Picker.Item label="+2 - Agitado" value={+2} />
-                                <Picker.Item label="+1 - Inquieto" value={+1} />
-                                <Picker.Item label="0 - Alerta e calmo" value={0} />
-                                <Picker.Item label="-1 - Sonolento" value={-1} />
-                                <Picker.Item label="-2 - Sedação leve" value={-2} />
-                                <Picker.Item label="-3 - Sedação moderada" value={-3} />
-                                <Picker.Item label="-4 - Sedação profunda" value={-4} />
-                                <Picker.Item label="-5 - Não despertável" value={-5} />
-                            </Picker>
+                                <UnifiedPicker.Item label="+4 - Combativo" value={+4} />
+                                <UnifiedPicker.Item label="+3 - Muito agitado" value={+3} />
+                                <UnifiedPicker.Item label="+2 - Agitado" value={+2} />
+                                <UnifiedPicker.Item label="+1 - Inquieto" value={+1} />
+                                <UnifiedPicker.Item label="0 - Alerta e calmo" value={0} />
+                                <UnifiedPicker.Item label="-1 - Sonolento" value={-1} />
+                                <UnifiedPicker.Item label="-2 - Sedação leve" value={-2} />
+                                <UnifiedPicker.Item label="-3 - Sedação moderada" value={-3} />
+                                <UnifiedPicker.Item label="-4 - Sedação profunda" value={-4} />
+                                <UnifiedPicker.Item label="-5 - Não despertável" value={-5} />
+                            </UnifiedPicker>
                         </View>
 
                         <View style={styles.resultContainer}>
@@ -374,14 +429,14 @@ const EscalasHospitalares = ({ navigation, route }) => {
                             <Text style={styles.sectionTitle}>
                                 O paciente teve flutuação do estado mental nas últimas 24 horas?
                             </Text>
-                            <Picker
+                            <UnifiedPicker
                                 selectedValue={inicioAgudo}
                                 onValueChange={(itemValue) => setInicioAgudo(itemValue)}
                                 style={styles.picker}
                             >
-                                <Picker.Item label="1 - Não" value={0} />
-                                <Picker.Item label="2 - Sim" value={1} />
-                            </Picker>
+                                <UnifiedPicker.Item label="1 - Não" value={0} />
+                                <UnifiedPicker.Item label="2 - Sim" value={1} />
+                            </UnifiedPicker>
                         </View>
 
                         <View style={styles.section}>
@@ -394,36 +449,36 @@ const EscalasHospitalares = ({ navigation, route }) => {
                             <Text style={styles.sectionTitle}>
                                 Quantos erros o paciente cometeu durante o teste?
                             </Text>
-                            <Picker
+                            <UnifiedPicker
                                 selectedValue={inatencao}
                                 onValueChange={(itemValue) => setInatencao(itemValue)}
                                 style={styles.picker}
                             >
-                                <Picker.Item label="1 - Cometeu menos que 3 erros" value={0} />
-                                <Picker.Item label="2 - Cometeu 3 ou mais erros" value={1} />
-                            </Picker>
+                                <UnifiedPicker.Item label="1 - Cometeu menos que 3 erros" value={0} />
+                                <UnifiedPicker.Item label="2 - Cometeu 3 ou mais erros" value={1} />
+                            </UnifiedPicker>
                         </View>
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>
                                 Qual o Estado Atual Na escala de RASS (Richmond Agitation-Sedation Scale) do paciente.
                             </Text>
-                            <Picker
+                            <UnifiedPicker
                                 selectedValue={rassscore}
                                 onValueChange={(itemValue) => setRassscore(itemValue)}
                                 style={styles.picker}
                             >
-                                <Picker.Item label="1 - Agressivo" value={4} />
-                                <Picker.Item label="2 - Muito Agitado" value={3} />
-                                <Picker.Item label="3 - Agitado" value={2} />
-                                <Picker.Item label="4 - Inquieto" value={1} />
-                                <Picker.Item label="5 - Tranquilo" value={0} />
-                                <Picker.Item label="6 - Sonolento" value={-1} />
-                                <Picker.Item label="7 - Acorda ao Estímulo leve" value={-2} />
-                                <Picker.Item label="8 - Sem Contato Visual" value={-3} />
-                                <Picker.Item label="9 - Acorda por Dor" value={-4} />
-                                <Picker.Item label="10 - Irresponsivo" value={-5} />
-                            </Picker>
+                                <UnifiedPicker.Item label="1 - Agressivo" value={4} />
+                                <UnifiedPicker.Item label="2 - Muito Agitado" value={3} />
+                                <UnifiedPicker.Item label="3 - Agitado" value={2} />
+                                <UnifiedPicker.Item label="4 - Inquieto" value={1} />
+                                <UnifiedPicker.Item label="5 - Tranquilo" value={0} />
+                                <UnifiedPicker.Item label="6 - Sonolento" value={-1} />
+                                <UnifiedPicker.Item label="7 - Acorda ao Estímulo leve" value={-2} />
+                                <UnifiedPicker.Item label="8 - Sem Contato Visual" value={-3} />
+                                <UnifiedPicker.Item label="9 - Acorda por Dor" value={-4} />
+                                <UnifiedPicker.Item label="10 - Irresponsivo" value={-5} />
+                            </UnifiedPicker>
                         </View>
 
                         <View style={styles.section}>
@@ -445,14 +500,14 @@ const EscalasHospitalares = ({ navigation, route }) => {
                             <Text style={styles.sectionTitle}>
                                 Comando: Diga ao paciente: "Levante estes dedos" Em seguida: "Agora faça a mesma coisa com a outra mão"
                             </Text>
-                            <Picker
+                            <UnifiedPicker
                                 selectedValue={pensamentodesorganizado}
                                 onValueChange={(itemValue) => setPensamentodesorganizado(itemValue)}
                                 style={styles.picker}
                             >
-                                <Picker.Item label="1 - Cometeu menos que 2 erros" value={0} />
-                                <Picker.Item label="2 - Cometeu 2 ou mais erros" value={1} />
-                            </Picker>
+                                <UnifiedPicker.Item label="1 - Cometeu menos que 2 erros" value={0} />
+                                <UnifiedPicker.Item label="2 - Cometeu 2 ou mais erros" value={1} />
+                            </UnifiedPicker>
                         </View>
 
                         <View style={styles.resultContainer}>
@@ -510,18 +565,18 @@ const EscalasHospitalares = ({ navigation, route }) => {
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Nível de Sedação</Text>
-                            <Picker
+                            <UnifiedPicker
                                 selectedValue={ramsayScore}
                                 onValueChange={(itemValue) => setRamsayScore(Number(itemValue))}
                                 style={styles.picker}
                             >
-                                <Picker.Item label="1 - Ansioso, agitado ou inquieto" value={1} />
-                                <Picker.Item label="2 - Cooperativo, orientado e tranquilo" value={2} />
-                                <Picker.Item label="3 - Responde apenas a comandos verbais" value={3} />
-                                <Picker.Item label="4 - Resposta rápida a estímulo tátil ou auditivo" value={4} />
-                                <Picker.Item label="5 - Resposta lenta a estímulo doloroso" value={5} />
-                                <Picker.Item label="6 - Sem resposta a qualquer estímulo" value={6} />
-                            </Picker>
+                                <UnifiedPicker.Item label="1 - Ansioso, agitado ou inquieto" value={1} />
+                                <UnifiedPicker.Item label="2 - Cooperativo, orientado e tranquilo" value={2} />
+                                <UnifiedPicker.Item label="3 - Responde apenas a comandos verbais" value={3} />
+                                <UnifiedPicker.Item label="4 - Resposta rápida a estímulo tátil ou auditivo" value={4} />
+                                <UnifiedPicker.Item label="5 - Resposta lenta a estímulo doloroso" value={5} />
+                                <UnifiedPicker.Item label="6 - Sem resposta a qualquer estímulo" value={6} />
+                            </UnifiedPicker>
                         </View>
 
                         <View style={styles.resultContainer}>
@@ -541,17 +596,17 @@ const EscalasHospitalares = ({ navigation, route }) => {
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Selecione o nível:</Text>
-                            <Picker
+                            <UnifiedPicker
                                 selectedValue={avpuLevel}
                                 onValueChange={(itemValue) => setAvpuLevel(itemValue)}
                                 style={styles.picker}
                             >
-                                <Picker.Item label="Escolha uma opção" value="" />
-                                <Picker.Item label="A - Alerta" value="A" />
-                                <Picker.Item label="V - Verbal" value="V" />
-                                <Picker.Item label="P - Dor" value="P" />
-                                <Picker.Item label="U - Não responsivo" value="U" />
-                            </Picker>
+                                <UnifiedPicker.Item label="Escolha uma opção" value="" />
+                                <UnifiedPicker.Item label="A - Alerta" value="A" />
+                                <UnifiedPicker.Item label="V - Verbal" value="V" />
+                                <UnifiedPicker.Item label="P - Dor" value="P" />
+                                <UnifiedPicker.Item label="U - Não responsivo" value="U" />
+                            </UnifiedPicker>
                         </View>
 
                         <View style={styles.resultContainer}>
@@ -571,32 +626,32 @@ const EscalasHospitalares = ({ navigation, route }) => {
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Flexão de Ombro (Esquerdo)</Text>
-                            <Picker
+                            <UnifiedPicker
                                 selectedValue={flexaoOmbroEsq}
                                 onValueChange={(itemValue) => setFlexaoOmbroEsq(itemValue)}
                                 style={styles.picker}
                             >
-                                <Picker.Item label="5 - consegue flexionar e vence grande resistencia" value={5} />
-                                <Picker.Item label="4 - consegue flexionar e vence pouca resistencia" value={4} />
-                                <Picker.Item label="3 - consegue flexionar sem resistencia" value={3} />
-                                <Picker.Item label="2 - não consegue flexionar por completo" value={2} />
-                                <Picker.Item label="1 - Não Testável" value={1} />
-                            </Picker>
+                                <UnifiedPicker.Item label="5 - consegue flexionar e vence grande resistencia" value={5} />
+                                <UnifiedPicker.Item label="4 - consegue flexionar e vence pouca resistencia" value={4} />
+                                <UnifiedPicker.Item label="3 - consegue flexionar sem resistencia" value={3} />
+                                <UnifiedPicker.Item label="2 - não consegue flexionar por completo" value={2} />
+                                <UnifiedPicker.Item label="1 - Não Testável" value={1} />
+                            </UnifiedPicker>
                         </View>
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Flexão de Ombro (Direito)</Text>
-                            <Picker
+                            <UnifiedPicker
                                 selectedValue={flexaoOmbroDir}
                                 onValueChange={(itemValue) => setFlexaoOmbroDir(itemValue)}
                                 style={styles.picker}
                             >
-                                <Picker.Item label="5 - consegue flexionar e vence grande resistencia" value={5} />
-                                <Picker.Item label="4 - consegue flexionar e vence pouca resistencia" value={4} />
-                                <Picker.Item label="3 - consegue flexionar sem resistencia" value={3} />
-                                <Picker.Item label="2 - não consegue flexionar por completo" value={2} />
-                                <Picker.Item label="1 - Não Testável" value={1} />
-                            </Picker>
+                                <UnifiedPicker.Item label="5 - consegue flexionar e vence grande resistencia" value={5} />
+                                <UnifiedPicker.Item label="4 - consegue flexionar e vence pouca resistencia" value={4} />
+                                <UnifiedPicker.Item label="3 - consegue flexionar sem resistencia" value={3} />
+                                <UnifiedPicker.Item label="2 - não consegue flexionar por completo" value={2} />
+                                <UnifiedPicker.Item label="1 - Não Testável" value={1} />
+                            </UnifiedPicker>
                         </View>
 
                         <View style={styles.resultContainer}>
@@ -616,20 +671,20 @@ const EscalasHospitalares = ({ navigation, route }) => {
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Selecione o nível:</Text>
-                            <Picker
+                            <UnifiedPicker
                                 selectedValue={rankinLevel}
                                 onValueChange={(itemValue) => setRankinLevel(itemValue)}
                                 style={styles.picker}
                             >
-                                <Picker.Item label="Escolha uma opção" value="" />
-                                <Picker.Item label="0 – Sem sintomas" value="0" />
-                                <Picker.Item label="1 – Sem incapacidade significativa" value="1" />
-                                <Picker.Item label="2 – Incapacidade leve" value="2" />
-                                <Picker.Item label="3 – Incapacidade moderada" value="3" />
-                                <Picker.Item label="4 – Incapacidade moderadamente grave" value="4" />
-                                <Picker.Item label="5 – Incapacidade grave" value="5" />
-                                <Picker.Item label="6 – Óbito" value="6" />
-                            </Picker>
+                                <UnifiedPicker.Item label="Escolha uma opção" value="" />
+                                <UnifiedPicker.Item label="0 – Sem sintomas" value="0" />
+                                <UnifiedPicker.Item label="1 – Sem incapacidade significativa" value="1" />
+                                <UnifiedPicker.Item label="2 – Incapacidade leve" value="2" />
+                                <UnifiedPicker.Item label="3 – Incapacidade moderada" value="3" />
+                                <UnifiedPicker.Item label="4 – Incapacidade moderadamente grave" value="4" />
+                                <UnifiedPicker.Item label="5 – Incapacidade grave" value="5" />
+                                <UnifiedPicker.Item label="6 – Óbito" value="6" />
+                            </UnifiedPicker>
                         </View>
 
                         <View style={styles.resultContainer}>
@@ -649,26 +704,26 @@ const EscalasHospitalares = ({ navigation, route }) => {
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>1. Paralisia Facial</Text>
-                            <Picker selectedValue={face} onValueChange={(v) => setFace(v)} style={styles.picker}>
-                                <Picker.Item label="Normal" value="normal" />
-                                <Picker.Item label="Anormal" value="abnormal" />
-                            </Picker>
+                            <UnifiedPicker selectedValue={face} onValueChange={(v) => setFace(v)} style={styles.picker}>
+                                <UnifiedPicker.Item label="Normal" value="normal" />
+                                <UnifiedPicker.Item label="Anormal" value="abnormal" />
+                            </UnifiedPicker>
                         </View>
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>2. Fraqueza em um dos Braços</Text>
-                            <Picker selectedValue={arm} onValueChange={(v) => setArm(v)} style={styles.picker}>
-                                <Picker.Item label="Normal" value="normal" />
-                                <Picker.Item label="Anormal" value="anormal" />
-                            </Picker>
+                            <UnifiedPicker selectedValue={arm} onValueChange={(v) => setArm(v)} style={styles.picker}>
+                                <UnifiedPicker.Item label="Normal" value="normal" />
+                                <UnifiedPicker.Item label="Anormal" value="anormal" />
+                            </UnifiedPicker>
                         </View>
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>3. Alteração da Fala</Text>
-                            <Picker selectedValue={speech} onValueChange={(v) => setSpeech(v)} style={styles.picker}>
-                                <Picker.Item label="Normal" value="normal" />
-                                <Picker.Item label="Anormal" value="abnormal" />
-                            </Picker>
+                            <UnifiedPicker selectedValue={speech} onValueChange={(v) => setSpeech(v)} style={styles.picker}>
+                                <UnifiedPicker.Item label="Normal" value="normal" />
+                                <UnifiedPicker.Item label="Anormal" value="abnormal" />
+                            </UnifiedPicker>
                         </View>
 
                         <View style={styles.resultContainer}>

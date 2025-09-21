@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import './src/utils/polyfills'; // Importar polyfills primeiro
 import { createStackNavigator } from '@react-navigation/stack';
 import Login from './src/screens/Login';
 import Cadastro from './src/screens/Cadastro';
@@ -18,11 +19,19 @@ import { AuthProvider } from './src/context/AuthContext';
 import { AvaliacaoConsolidadaProvider } from './src/context/AvaliacaoConsolidadaContext';
 import { ExameFisicoProvider } from './src/context/ExameFisicoContext';
 import { ExamesComplementaresProvider } from './src/context/ExamesComplementaresContext';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Platform } from 'react-native';
+import { useWindowDimensions } from './src/hooks/useWindowDimensions';
 
 const Stack = createStackNavigator();
 
 export default function App() {
+  const { width, height } = useWindowDimensions();
+  
+  // Debug: log das dimensões da tela
+  React.useEffect(() => {
+    console.log('Dimensões da tela:', { width, height });
+  }, [width, height]);
+
   return (
     <AuthProvider>
       <PacientesProvider>
@@ -30,7 +39,18 @@ export default function App() {
           <ExameFisicoProvider>
             <ExamesComplementaresProvider>
               <AvaliacaoConsolidadaProvider>
-            <NavigationContainer>
+            <NavigationContainer
+              onStateChange={(state) => {
+                if (Platform.OS === 'web') {
+                  console.log('Navigation state changed:', state);
+                }
+              }}
+              onReady={() => {
+                if (Platform.OS === 'web') {
+                  console.log('NavigationContainer ready');
+                }
+              }}
+            >
           <Stack.Navigator 
             initialRouteName="Login"
             screenOptions={{
@@ -41,6 +61,21 @@ export default function App() {
               headerTitleStyle: {
                 fontWeight: 'bold',
               },
+              gestureEnabled: true,
+              ...(Platform.OS === 'web' ? {
+                cardStyle: { 
+                  backgroundColor: '#f8f9fa',
+                  width: width,
+                  height: height,
+                  minHeight: '100vh',
+                  minWidth: '100vw',
+                },
+                animationEnabled: false,
+              } : {
+                cardStyle: { 
+                  backgroundColor: '#f8f9fa',
+                },
+              }),
             }}
           >
             <Stack.Screen 
@@ -53,7 +88,10 @@ export default function App() {
               component={ListaPacientes} 
               options={{ 
                 headerShown: false,
-                gestureEnabled: false
+                gestureEnabled: true,
+                ...(Platform.OS === 'web' && {
+                  animationEnabled: false,
+                }),
               }}
             />
             <Stack.Screen 
@@ -77,7 +115,12 @@ export default function App() {
                           component={AvaliacaoPaciente}
                           options={{
                             title: 'Avaliação do Paciente',
-                            headerBackTitle: 'Voltar'
+                            headerBackTitle: 'Voltar',
+                            gestureEnabled: true,
+                            headerShown: true,
+                            ...(Platform.OS === 'web' && {
+                              animationEnabled: false,
+                            }),
                           }}
                         />
                         <Stack.Screen

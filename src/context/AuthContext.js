@@ -23,6 +23,30 @@ export const AuthProvider = ({ children }) => {
             nome: 'Administrador',
             email: 'admin@sistemaavc.com',
             tipo: 'admin'
+        },
+        {
+            id: '2',
+            username: 'medico',
+            password: 'medico123',
+            nome: 'Dr. João Silva',
+            email: 'joao.medico@sistemaavc.com',
+            tipo: 'medico'
+        },
+        {
+            id: '3',
+            username: 'enfermeiro',
+            password: 'enfermeiro123',
+            nome: 'Enfermeira Maria Santos',
+            email: 'maria.enfermeiro@sistemaavc.com',
+            tipo: 'enfermeiro'
+        },
+        {
+            id: '4',
+            username: 'teste',
+            password: '123456',
+            nome: 'Usuário Teste',
+            email: 'teste@sistemaavc.com',
+            tipo: 'usuario'
         }
     ];
 

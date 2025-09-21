@@ -6,7 +6,16 @@ import {
     StyleSheet,
     Platform
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+
+// Import condicional do DateTimePicker apenas para mobile
+let DateTimePicker = null;
+if (Platform.OS !== 'web') {
+    try {
+        DateTimePicker = require('@react-native-community/datetimepicker').default;
+    } catch (error) {
+        console.warn('DateTimePicker não disponível:', error);
+    }
+}
 
 const DatePicker = ({
     label,
@@ -56,9 +65,28 @@ const DatePicker = ({
     // Função para abrir o picker
     const handleOpenPicker = useCallback(() => {
         if (!disabled) {
-            setShowPicker(true);
+            if (Platform.OS === 'web') {
+                // Na web, usar input type="date" nativo
+                const input = document.createElement('input');
+                input.type = 'date';
+                input.value = parseDateString(value).toISOString().split('T')[0];
+                input.min = minimumDate ? minimumDate.toISOString().split('T')[0] : undefined;
+                input.max = maximumDate ? maximumDate.toISOString().split('T')[0] : undefined;
+                
+                input.onchange = (e) => {
+                    if (e.target.value) {
+                        const selectedDate = new Date(e.target.value);
+                        const formattedDate = selectedDate.toLocaleDateString('pt-BR');
+                        onDateChange(formattedDate);
+                    }
+                };
+                
+                input.click();
+            } else {
+                setShowPicker(true);
+            }
         }
-    }, [disabled]);
+    }, [disabled, value, minimumDate, maximumDate, onDateChange, parseDateString]);
 
     return (
         <View style={[styles.container, style]}>
@@ -86,7 +114,7 @@ const DatePicker = ({
                 </Text>
             </TouchableOpacity>
 
-            {showPicker && (
+            {showPicker && DateTimePicker && (
                 <DateTimePicker
                     value={parseDateString(value)}
                     mode="date"

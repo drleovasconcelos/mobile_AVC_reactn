@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, Platform } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 
 const Login = ({ navigation }) => {
@@ -30,16 +30,18 @@ const Login = ({ navigation }) => {
         const result = login(username, password);
         
         if (result.success) {
-            Alert.alert(
-                'Sucesso', 
-                `Bem-vindo, ${result.user.nome}!`,
-                [
-                    {
-                        text: 'OK',
-                        onPress: () => navigation.navigate('ListaPacientes')
-                    }
-                ]
-            );
+            // Navegação direta para ambas as plataformas
+            navigation.navigate('ListaPacientes');
+            
+            // Mostrar mensagem de boas-vindas
+            if (Platform.OS === 'web') {
+                console.log(`Bem-vindo, ${result.user.nome}!`);
+            } else {
+                Alert.alert(
+                    'Sucesso', 
+                    `Bem-vindo, ${result.user.nome}!`
+                );
+            }
         } else {
             setErrors({ general: result.message });
         }
