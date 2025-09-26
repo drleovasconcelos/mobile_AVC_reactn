@@ -11,6 +11,7 @@ import {
     KeyboardAvoidingView,
     Platform,
     Modal
+    
 } from 'react-native';
 import Footer from '../components/Footer';
 import { useAnamnese } from '../context/AnamneseContext';
